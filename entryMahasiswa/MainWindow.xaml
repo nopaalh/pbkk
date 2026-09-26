@@ -9,7 +9,6 @@
     <Grid Margin="28">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -22,9 +21,6 @@
                 <TextBlock Text="Registrasi Mahasiswa" FontSize="25" FontWeight="Bold" />
                 <TextBlock Text="Kelola data mahasiswa dengan mudah" Foreground="#6B7280" Margin="0,3,0,0" />
             </StackPanel>
-            <Border DockPanel.Dock="Right" Background="#E8EAFE" CornerRadius="16" Padding="12,7" VerticalAlignment="Center">
-                <TextBlock Text="WPF · .NET 8" Foreground="#4338CA" FontWeight="SemiBold" />
-            </Border>
         </DockPanel>
 
         <Grid Grid.Row="1" Margin="0,0,0,20">
@@ -36,7 +32,10 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Border Grid.Column="0" Background="White" CornerRadius="12" Padding="16,13" BorderBrush="#E7EAF0" BorderThickness="1">
-                <StackPanel><TextBlock Text="TOTAL MAHASISWA" FontSize="11" FontWeight="SemiBold" Foreground="#737B8C"/><TextBlock x:Name="txtTotal" Text="0" FontSize="24" FontWeight="Bold" Margin="0,5,0,0"/></StackPanel>
+                <StackPanel>
+                <TextBlock Text="TOTAL MAHASISWA" FontSize="11" FontWeight="SemiBold" Foreground="#737B8C"/>
+                <TextBlock x:Name="txtTotal" Text="0" FontSize="24" FontWeight="Bold" Margin="0,5,0,0"/>
+                </StackPanel>
             </Border>
             <Border Grid.Column="2" Background="White" CornerRadius="12" Padding="16,13" BorderBrush="#E7EAF0" BorderThickness="1">
                 <StackPanel><TextBlock Text="PROGRAM STUDI" FontSize="11" FontWeight="SemiBold" Foreground="#737B8C"/><TextBlock x:Name="txtProgram" Text="4 pilihan" FontSize="24" FontWeight="Bold" Margin="0,5,0,0"/></StackPanel>
@@ -80,11 +79,9 @@
                         </StackPanel>
 
                         <WrapPanel Margin="0,22,0,0">
-                            <Button x:Name="btnSimpan" Content="Simpan Mahasiswa" Background="{StaticResource PrimaryBrush}" Foreground="White" Click="BtnSimpan_Click" Margin="0,0,8,8" />
-                            <Button Content="Perbarui" Background="#E8EAFE" Foreground="#4338CA" Click="BtnPerbarui_Click" Margin="0,0,8,8" />
+                            <Button x:Name="btnSimpan" Content="Tambahkan Data" Background="{StaticResource PrimaryBrush}" Foreground="White" Click="BtnSimpan_Click" Margin="0,0,8,8" />
                             <Button Content="Reset" Background="#F0F2F6" Foreground="#4B5563" Click="BtnReset_Click" Margin="0,0,0,8" />
                         </WrapPanel>
-                        <Button Content="Hapus Data Terpilih" Background="#FEECEC" Foreground="#B42318" HorizontalAlignment="Left" Click="BtnHapus_Click" />
                     </StackPanel>
                 </ScrollViewer>
             </Border>
@@ -103,7 +100,7 @@
                         </StackPanel>
                     </DockPanel>
                     <TextBox x:Name="txtCari" Grid.Row="1" Height="40" Margin="0,0,0,12" ToolTip="Cari berdasarkan NIM, nama, prodi, atau jenis kelamin" TextChanged="TxtCari_TextChanged" />
-                    <ListBox x:Name="lstMahasiswa" Grid.Row="2" BorderThickness="0" Background="Transparent" SelectionChanged="LstMahasiswa_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox x:Name="lstMahasiswa" Grid.Row="2" BorderThickness="0" Background="Transparent" SelectionChanged="LstMahasiswa_SelectionChanged" PreviewMouseLeftButtonDown="LstMahasiswa_PreviewMouseLeftButtonDown" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Border Background="#F8F9FC" BorderBrush="#E8EBF2" BorderThickness="1" CornerRadius="10" Padding="13" Margin="0,0,0,9">
@@ -112,6 +109,8 @@
                                             <ColumnDefinition Width="42" />
                                             <ColumnDefinition Width="12" />
                                             <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="10" />
+                                            <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <Border Grid.Column="0" Width="40" Height="40" CornerRadius="20" Background="#E8EAFE">
                                             <TextBlock Text="{Binding Inisial}" Foreground="#4338CA" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -123,6 +122,10 @@
                                             </DockPanel>
                                             <TextBlock Text="{Binding Detail}" Foreground="#6B7280" FontSize="12" Margin="0,4,0,0" />
                                         </StackPanel>
+                                        <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Button Content="Perbarui" Padding="10,6" Background="#E8EAFE" Foreground="#4338CA" Click="BtnPerbarui_Click" Margin="0,0,6,0" />
+                                            <Button Content="Hapus" Padding="10,6" Background="#FEECEC" Foreground="#B42318" Click="BtnHapus_Click" />
+                                        </StackPanel>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
@@ -131,7 +134,5 @@
                 </Grid>
             </Border>
         </Grid>
-
-        <TextBlock Grid.Row="3" Text="Data tersimpan selama aplikasi berjalan." Foreground="#818898" FontSize="11" HorizontalAlignment="Right" Margin="0,12,2,0" />
     </Grid>
 </Window>

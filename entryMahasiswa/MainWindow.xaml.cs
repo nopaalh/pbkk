@@ -3,6 +3,8 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace StudentRegistrationApp;
 
@@ -47,9 +49,14 @@ public partial class MainWindow : Window
 
     private void BtnPerbarui_Click(object sender, RoutedEventArgs e)
     {
-        if (lstMahasiswa.SelectedItem is not Mahasiswa selected)
+        if (sender is not Button { DataContext: Mahasiswa selected })
         {
-            MessageBox.Show("Pilih data mahasiswa yang akan diperbarui.", "Informasi", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        if (!ReferenceEquals(lstMahasiswa.SelectedItem, selected))
+        {
+            lstMahasiswa.SelectedItem = selected;
             return;
         }
 
@@ -77,9 +84,8 @@ public partial class MainWindow : Window
 
     private void BtnHapus_Click(object sender, RoutedEventArgs e)
     {
-        if (lstMahasiswa.SelectedItem is not Mahasiswa selected)
+        if (sender is not Button { DataContext: Mahasiswa selected })
         {
-            MessageBox.Show("Pilih data mahasiswa yang ingin dihapus.", "Informasi", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
@@ -124,6 +130,26 @@ public partial class MainWindow : Window
         };
     }
 
+    private void LstMahasiswa_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (FindVisualParent<Button>(e.OriginalSource as DependencyObject) is not null)
+        {
+            return;
+        }
+
+        var clickedItem = ItemsControl.ContainerFromElement(
+            lstMahasiswa,
+            e.OriginalSource as DependencyObject) as ListBoxItem;
+
+        if (clickedItem?.IsSelected != true)
+        {
+            return;
+        }
+
+        e.Handled = true;
+        ResetForm();
+    }
+
     private void LstMahasiswa_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (lstMahasiswa.SelectedItem is not Mahasiswa selected)
@@ -139,6 +165,21 @@ public partial class MainWindow : Window
             .FindIndex(item => string.Equals(item.Content?.ToString(), selected.Prodi, StringComparison.Ordinal));
         rbLaki.IsChecked = selected.JenisKelamin == "Laki-laki";
         rbPerempuan.IsChecked = selected.JenisKelamin == "Perempuan";
+    }
+
+    private static T? FindVisualParent<T>(DependencyObject? child) where T : DependencyObject
+    {
+        while (child is not null)
+        {
+            if (child is T parent)
+            {
+                return parent;
+            }
+
+            child = VisualTreeHelper.GetParent(child);
+        }
+
+        return null;
     }
 
     private bool TryReadForm(out string nim, out string nama, out string prodi, out string jenisKelamin)

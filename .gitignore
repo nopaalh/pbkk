@@ -1,0 +1,11 @@
+# .NET build outputs
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+
+# Visual Studio user files
+.vs/
+*.user
+*.suo
