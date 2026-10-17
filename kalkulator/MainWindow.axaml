@@ -1,0 +1,173 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Kalkulator.MainWindow"
+        Title="Kalkulator Saintifik"
+        Width="520" Height="960"
+        MinWidth="380" MinHeight="700"
+        CanResize="True"
+        WindowStartupLocation="CenterScreen"
+        Background="#000000"
+        KeyDown="OnWindowKeyDown"
+        TextInput="OnWindowTextInput">
+
+    <Viewbox Stretch="Uniform">
+        <Border Width="540"
+                Height="1000"
+                Background="#000000"
+                CornerRadius="52"
+                Padding="20,28,20,28">
+            <Grid RowDefinitions="*,Auto">
+
+                <!-- Area Layar Atas (Hitam Pekat, Angka Putih Rata Kanan seperti Foto) -->
+                <StackPanel Grid.Row="0"
+                            VerticalAlignment="Bottom"
+                            HorizontalAlignment="Stretch"
+                            Margin="12,0,18,22">
+                    <TextBlock x:Name="TextRiwayat"
+                               Text=""
+                               Foreground="#8E8E93"
+                               FontSize="28"
+                               FontWeight="Light"
+                               HorizontalAlignment="Right"
+                               TextAlignment="Right"
+                               Margin="0,0,4,4"/>
+                    <Viewbox StretchDirection="DownOnly"
+                             HorizontalAlignment="Right"
+                             MaxWidth="470">
+                        <TextBlock x:Name="TextLayar"
+                                   Text="0"
+                                   Foreground="#FFFFFF"
+                                   FontSize="96"
+                                   FontWeight="Regular"
+                                   HorizontalAlignment="Right"
+                                   TextAlignment="Right"/>
+                    </Viewbox>
+                </StackPanel>
+
+                <!-- Grid Tombol Bulat 6 Baris x 5 Kolom -->
+                <Grid Grid.Row="1"
+                      RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
+                      ColumnDefinitions="*,*,*,*,*">
+
+                    <!-- Baris 0 (Fungsi Saintifik Atas): DEG, sin, cos, tan, n! -->
+                    <Button Grid.Row="0" Grid.Column="0" x:Name="BtnMode" Content="DEG" Click="OnModeToggleClick" Classes="sci" FontSize="28" Foreground="#FF9F0A"/>
+                    <Button Grid.Row="0" Grid.Column="1" Content="sin" Click="OnScientificUnaryClick" Classes="sci" Tag="sin"/>
+                    <Button Grid.Row="0" Grid.Column="2" Content="cos" Click="OnScientificUnaryClick" Classes="sci" Tag="cos"/>
+                    <Button Grid.Row="0" Grid.Column="3" Content="tan" Click="OnScientificUnaryClick" Classes="sci" Tag="tan"/>
+                    <Button Grid.Row="0" Grid.Column="4" Content="n!" Click="OnScientificUnaryClick" Classes="sci" Tag="fact"/>
+
+                    <!-- Baris 1: x^y | C, AC, %, ÷ -->
+                    <Button Grid.Row="1" Grid.Column="0" Content="xʸ" Click="OnOperatorClick" Classes="sci" Tag="^"/>
+                    <Button Grid.Row="1" Grid.Column="1" Content="C" Click="OnClearEntryClick" Classes="top"/>
+                    <Button Grid.Row="1" Grid.Column="2" Content="AC" Click="OnAllClearClick" Classes="top"/>
+                    <Button Grid.Row="1" Grid.Column="3" Content="%" Click="OnPercentClick" Classes="top"/>
+                    <Button Grid.Row="1" Grid.Column="4" Content="÷" Click="OnOperatorClick" Classes="op" Tag="/"/>
+
+                    <!-- Baris 2: x² | 7, 8, 9, × -->
+                    <Button Grid.Row="2" Grid.Column="0" Content="x²" Click="OnScientificUnaryClick" Classes="sci" Tag="sqr"/>
+                    <Button Grid.Row="2" Grid.Column="1" Content="7" Click="OnAngkaClick" Classes="num" Tag="7"/>
+                    <Button Grid.Row="2" Grid.Column="2" Content="8" Click="OnAngkaClick" Classes="num" Tag="8"/>
+                    <Button Grid.Row="2" Grid.Column="3" Content="9" Click="OnAngkaClick" Classes="num" Tag="9"/>
+                    <Button Grid.Row="2" Grid.Column="4" Content="×" Click="OnOperatorClick" Classes="op" Tag="*"/>
+
+                    <!-- Baris 3: √ | 4, 5, 6, - -->
+                    <Button Grid.Row="3" Grid.Column="0" Content="√" Click="OnScientificUnaryClick" Classes="sci" Tag="sqrt"/>
+                    <Button Grid.Row="3" Grid.Column="1" Content="4" Click="OnAngkaClick" Classes="num" Tag="4"/>
+                    <Button Grid.Row="3" Grid.Column="2" Content="5" Click="OnAngkaClick" Classes="num" Tag="5"/>
+                    <Button Grid.Row="3" Grid.Column="3" Content="6" Click="OnAngkaClick" Classes="num" Tag="6"/>
+                    <Button Grid.Row="3" Grid.Column="4" Content="-" Click="OnOperatorClick" Classes="op" Tag="-"/>
+
+                    <!-- Baris 4: ln | 1, 2, 3, + -->
+                    <Button Grid.Row="4" Grid.Column="0" Content="ln" Click="OnScientificUnaryClick" Classes="sci" Tag="ln"/>
+                    <Button Grid.Row="4" Grid.Column="1" Content="1" Click="OnAngkaClick" Classes="num" Tag="1"/>
+                    <Button Grid.Row="4" Grid.Column="2" Content="2" Click="OnAngkaClick" Classes="num" Tag="2"/>
+                    <Button Grid.Row="4" Grid.Column="3" Content="3" Click="OnAngkaClick" Classes="num" Tag="3"/>
+                    <Button Grid.Row="4" Grid.Column="4" Content="+" Click="OnOperatorClick" Classes="op" Tag="+"/>
+
+                    <!-- Baris 5: log | +/-, 0, ., = -->
+                    <Button Grid.Row="5" Grid.Column="0" Content="log" Click="OnScientificUnaryClick" Classes="sci" Tag="log" FontSize="30"/>
+                    <Button Grid.Row="5" Grid.Column="1" Content="+/-" Click="OnPlusMinusClick" Classes="num" FontSize="34"/>
+                    <Button Grid.Row="5" Grid.Column="2" Content="0" Click="OnAngkaClick" Classes="num" Tag="0"/>
+                    <Button Grid.Row="5" Grid.Column="3" Content="." Click="OnAngkaClick" Classes="num" Tag="."/>
+                    <Button Grid.Row="5" Grid.Column="4" Content="=" Click="OnSamaDenganClick" Classes="op"/>
+                </Grid>
+            </Grid>
+        </Border>
+    </Viewbox>
+
+    <Window.Styles>
+        <!-- Style Dasar Tombol Bulat Presisi (90x90, CornerRadius 45) -->
+        <Style Selector="Button">
+            <Setter Property="Width" Value="90"/>
+            <Setter Property="Height" Value="90"/>
+            <Setter Property="CornerRadius" Value="45"/>
+            <Setter Property="Margin" Value="5,6"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="40"/>
+            <Setter Property="FontWeight" Value="Light"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Focusable" Value="False"/>
+        </Style>
+
+        <!-- Tombol Abu-Abu Terang: C, AC, % (#A5A5A5) -->
+        <Style Selector="Button.top">
+            <Setter Property="Background" Value="#A5A5A5"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+        </Style>
+        <Style Selector="Button.top:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#BDBDBD"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+        </Style>
+        <Style Selector="Button.top:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#D6D6D6"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+        </Style>
+
+        <!-- Tombol Angka & +/- & . (#333333) -->
+        <Style Selector="Button.num">
+            <Setter Property="Background" Value="#333333"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+        </Style>
+        <Style Selector="Button.num:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#4A4A4A"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+        </Style>
+        <Style Selector="Button.num:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#666666"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+        </Style>
+
+        <!-- Tombol Fungsi Saintifik: sin, cos, tan, log, ln, √, x², xʸ, n! (#222222) -->
+        <Style Selector="Button.sci">
+            <Setter Property="Background" Value="#222222"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontSize" Value="32"/>
+        </Style>
+        <Style Selector="Button.sci:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#383838"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+        </Style>
+        <Style Selector="Button.sci:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#505050"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+        </Style>
+
+        <!-- Tombol Operator Kanan: ÷, ×, -, +, = (#FF9F0A) -->
+        <Style Selector="Button.op">
+            <Setter Property="Background" Value="#FF9F0A"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontSize" Value="44"/>
+        </Style>
+        <Style Selector="Button.op:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#FFB340"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+        </Style>
+        <Style Selector="Button.op:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#CC7F08"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+        </Style>
+    </Window.Styles>
+</Window>
