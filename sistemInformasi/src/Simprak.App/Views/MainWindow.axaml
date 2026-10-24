@@ -1,0 +1,1308 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Simprak.App.ViewModels"
+        xmlns:ctrl="using:Simprak.App.Controls"
+        xmlns:conv="using:Simprak.App.Converters"
+        x:Class="Simprak.App.Views.MainWindow"
+        Title="SIMPRAK — Sistem Informasi Monitoring dan Penilaian Praktikum"
+        Width="1420" Height="860"
+        MinWidth="1280" MinHeight="740"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource PageBgBrush}">
+
+  <Window.Resources>
+    <conv:StringEqualsConverter x:Key="EqConv" />
+    <conv:StatusToBadgeBrushConverter x:Key="BadgeBgConv" IsForeground="False" />
+    <conv:StatusToBadgeBrushConverter x:Key="BadgeFgConv" IsForeground="True" />
+  </Window.Resources>
+
+  <Grid>
+    <!-- ================================================================== -->
+    <!-- 1. LAYAR LOGIN (SAAT BELUM LOGIN)                                  -->
+    <!-- ================================================================== -->
+    <Grid IsVisible="{Binding !IsLoggedIn}" Background="{DynamicResource PageBgBrush}">
+      <Grid ColumnDefinitions="1.15*,1*">
+        <!-- Panel Branding Kiri (180DC Green & Deep Forest Sidebar) -->
+        <Border Grid.Column="0" Background="{DynamicResource SidebarBgBrush}" Padding="56,48">
+          <StackPanel VerticalAlignment="Center" Spacing="18" MaxWidth="580">
+            <Border Background="{DynamicResource AccentBrush}" CornerRadius="99" Padding="14,6" HorizontalAlignment="Left">
+              <TextBlock Text="Laboratorium akademik" Foreground="{DynamicResource AccentForegroundBrush}" FontWeight="Bold" FontSize="13" />
+            </Border>
+            <TextBlock Text="SIMPRAK" Foreground="#FFFFFF" FontSize="50" FontWeight="ExtraBold" LetterSpacing="1" />
+            <TextBlock Text="Sistem Informasi Monitoring dan Penilaian Praktikum" Foreground="#D6E3D8" FontSize="21" FontWeight="SemiBold" TextWrapping="Wrap" />
+            <TextBlock Text="Setiap progres praktikan, terpantau akurat. Menyatukan manajemen praktikan, kelompok shift, modul penugasan, pengumpulan tautan tugas, evaluasi nilai berbobot, serta deteksi dini praktikan rawan mengulang (R1/R2/R3)."
+                       Foreground="#A3B8A8" FontSize="14" LineHeight="22" TextWrapping="Wrap" Margin="0,2,0,10" />
+
+            <!-- Feature Pills -->
+            <UniformGrid Columns="3">
+              <Border Background="#17271C" BorderBrush="#263E2C" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,10,0">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="Nilai &amp; progres" Foreground="#8BC34A" FontWeight="Bold" FontSize="13" />
+                  <TextBlock Text="Rekap praktikum dalam satu tempat" Foreground="#C8D8CB" FontSize="13" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+              <Border Background="#17271C" BorderBrush="#263E2C" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,10,0">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="▲ Deteksi Risiko" Foreground="#FBBF24" FontWeight="Bold" FontSize="13" />
+                  <TextBlock Text="Kenali praktikan yang tertinggal" Foreground="#C8D8CB" FontSize="13" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+              <Border Background="#17271C" BorderBrush="#263E2C" BorderThickness="1" CornerRadius="10" Padding="12">
+                <StackPanel Spacing="4">
+                  <TextBlock Text="● Audit &amp; Akses" Foreground="#38BDF8" FontWeight="Bold" FontSize="13" />
+                  <TextBlock Text="Akses kelompok dan riwayat perubahan" Foreground="#C8D8CB" FontSize="13" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+            </UniformGrid>
+
+            <Border Background="#18281D" BorderBrush="#2A4431" BorderThickness="1.2" CornerRadius="12" Padding="18" Margin="0,8,0,0">
+              <StackPanel Spacing="8">
+                <TextBlock Text="Coba dengan akun demo" Foreground="#8BC34A" FontWeight="Bold" FontSize="14" />
+                <TextBlock Text="• Koordinator Lab (Admin): username 'admin'  |  password 'admin123'" Foreground="#E2EBE0" FontSize="13" />
+                <TextBlock Text="• Asisten Lab (Shift A1): username 'asisten01'  |  password 'asisten123'" Foreground="#E2EBE0" FontSize="13" TextWrapping="Wrap" />
+                <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,6,0,0">
+                  <Button Classes="primary" Content="Isi akun Admin" Command="{Binding IsiDemoAdminCommand}" FontSize="13" />
+                  <Button Classes="secondary" Content="Isi akun Asisten" Command="{Binding IsiDemoAsistenCommand}" FontSize="13" />
+                </StackPanel>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </Border>
+
+        <!-- Panel Form Login Kanan -->
+        <Border Grid.Column="1" Padding="40" VerticalAlignment="Center" HorizontalAlignment="Center" Width="480">
+          <Border Classes="card" Padding="32">
+            <StackPanel Spacing="16">
+              <StackPanel Spacing="4">
+                <TextBlock Text="Selamat datang" Foreground="{DynamicResource AccentBrush}" FontSize="13" FontWeight="Bold" LetterSpacing="0.6" />
+                <TextBlock Text="Masuk ke SIMPRAK" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="23" FontWeight="ExtraBold" TextWrapping="Wrap" />
+                <TextBlock Text="Gunakan akun koordinator atau asisten laboratorium." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" LineHeight="20" TextWrapping="Wrap" />
+              </StackPanel>
+
+              <!-- Pesan Galat dengan Ikon + Teks (Accessible Color Guidance) -->
+              <Border IsVisible="{Binding LoginErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                      Background="{DynamicResource DangerBgBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1.2" CornerRadius="8" Padding="12,10">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <PathIcon Data="{StaticResource IconAlertTriangle}" Width="15" Height="15" Foreground="{DynamicResource DangerBrush}" VerticalAlignment="Center" />
+                  <TextBlock Text="{Binding LoginErrorMessage}" Foreground="{DynamicResource DangerBrush}" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+
+              <StackPanel Spacing="6">
+                <TextBlock Text="Username" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" FontSize="13" />
+                <TextBox Text="{Binding LoginUsername}" Watermark="Masukkan username (mis. admin / asisten01)" Padding="12,10" />
+              </StackPanel>
+
+              <StackPanel Spacing="6">
+                <TextBlock Text="Password" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" FontSize="13" />
+                <TextBox Text="{Binding LoginPassword}" PasswordChar="•" Watermark="Masukkan password" Padding="12,10" />
+              </StackPanel>
+
+              <Grid ColumnDefinitions="*,Auto">
+                <CheckBox IsChecked="{Binding LoginRememberMe}" Content="Ingat username di perangkat" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" />
+                <Button Grid.Column="1" Classes="secondary" Content="{Binding TemaAktif, StringFormat='Tema: {0}'}" Command="{Binding ToggleTemaCommand}" FontSize="13" />
+              </Grid>
+
+              <Button Classes="primary" IsDefault="True" Content="Masuk" Command="{Binding ProsesLoginCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="14,12" FontSize="14.5" />
+            </StackPanel>
+          </Border>
+        </Border>
+      </Grid>
+    </Grid>
+
+    <!-- ================================================================== -->
+    <!-- 2. SHELL UTAMA APLIKASI (SIDEBAR + HEADER + AREA KONTEN 12 LAYAR)  -->
+    <!-- ================================================================== -->
+    <Grid IsVisible="{Binding IsLoggedIn}" ColumnDefinitions="265,*">
+
+      <!-- SIDEBAR KIRI (180DC Deep Forest Charcoal #111C14 / #09100B) -->
+      <Border Grid.Column="0" Background="{DynamicResource SidebarBgBrush}" Padding="16,20">
+        <Grid RowDefinitions="Auto,*,Auto">
+          <!-- Brand Header -->
+          <Border Grid.Row="0" Background="#17261B" BorderBrush="#263E2C" BorderThickness="1" CornerRadius="10" Padding="14,12" Margin="0,0,0,18">
+            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+              <Border Width="36" Height="36" Background="{DynamicResource AccentBrush}" CornerRadius="8">
+                <TextBlock Text="S" Foreground="{DynamicResource AccentForegroundBrush}" FontSize="20" FontWeight="ExtraBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Border>
+              <StackPanel Spacing="1" VerticalAlignment="Center">
+                <TextBlock Text="SIMPRAK" Foreground="#FFFFFF" FontSize="19" FontWeight="ExtraBold" LetterSpacing="0.8" />
+                <TextBlock Text="Monitoring praktikum" Foreground="#8BC34A" FontSize="13" FontWeight="SemiBold" />
+              </StackPanel>
+            </StackPanel>
+          </Border>
+
+          <!-- Menu Navigasi Sesuai Peran (Ikon Vektor PathIcon + Indikator Aktif) -->
+          <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="4">
+              <TextBlock Text="Pemantauan &amp; data" Foreground="#B0C6B5" FontSize="13" FontWeight="Bold" Margin="10,4,0,4" LetterSpacing="0.6" />
+
+              <Button Classes="nav" Classes.active="{Binding IsNavDashboard}" Command="{Binding NavigasiKeCommand}" CommandParameter="Dashboard">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                  <PathIcon Data="{StaticResource IconDashboard}" Width="15" Height="15" Foreground="#8BC34A" VerticalAlignment="Center" />
+                  <TextBlock Text="Dashboard Analitik" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+
+              <Button Classes="nav" Classes.active="{Binding IsNavPraktikan}" Command="{Binding NavigasiKeCommand}" CommandParameter="Praktikan">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                  <PathIcon Data="{StaticResource IconUsers}" Width="15" Height="15" Foreground="#8BC34A" VerticalAlignment="Center" />
+                  <TextBlock Text="Daftar Praktikan" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+
+              <Button Classes="nav" Classes.active="{Binding IsNavKelompok}" Command="{Binding NavigasiKeCommand}" CommandParameter="Kelompok">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                  <PathIcon Data="{StaticResource IconLayers}" Width="15" Height="15" Foreground="#8BC34A" VerticalAlignment="Center" />
+                  <TextBlock Text="Kelompok &amp; Shift" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+
+              <Button Classes="nav" Classes.active="{Binding IsNavModul}" Command="{Binding NavigasiKeCommand}" CommandParameter="Modul">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                  <PathIcon Data="{StaticResource IconBook}" Width="15" Height="15" Foreground="#8BC34A" VerticalAlignment="Center" />
+                  <TextBlock Text="Modul Penugasan" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+
+              <Button Classes="nav" Classes.active="{Binding IsNavPenilaian}" Command="{Binding NavigasiKeCommand}" CommandParameter="Penilaian">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                  <PathIcon Data="{StaticResource IconCheckSquare}" Width="15" Height="15" Foreground="#8BC34A" VerticalAlignment="Center" />
+                  <TextBlock Text="Pengumpulan &amp; Nilai" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+
+              <!-- Menu Praktikan Berisiko dengan Lencana (Badge) -->
+              <Button Classes="nav" Classes.active="{Binding IsNavBerisiko}" Command="{Binding NavigasiKeCommand}" CommandParameter="Berisiko">
+                <Grid ColumnDefinitions="Auto,*,Auto" Width="205">
+                  <PathIcon Grid.Column="0" Data="{StaticResource IconAlertTriangle}" Width="15" Height="15" Foreground="#F87171" VerticalAlignment="Center" Margin="0,0,12,0" />
+                  <TextBlock Grid.Column="1" Text="Praktikan Berisiko" VerticalAlignment="Center" />
+                  <Border Grid.Column="2" Background="#B91C1C" CornerRadius="99" Padding="8,2" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding JumlahPraktikanBerisikoBadge}" Foreground="#FFFFFF" FontSize="13" FontWeight="ExtraBold" />
+                  </Border>
+                </Grid>
+              </Button>
+
+              <!-- Menu Administrasi (Hanya Admin) -->
+              <StackPanel IsVisible="{Binding IsAdmin}" Spacing="4" Margin="0,14,0,0">
+                <TextBlock Text="Administrasi" Foreground="#B0C6B5" FontSize="13" FontWeight="Bold" Margin="10,4,0,4" LetterSpacing="0.6" />
+                <Button Classes="nav" Classes.active="{Binding IsNavLogAktivitas}" Command="{Binding NavigasiKeCommand}" CommandParameter="LogAktivitas">
+                  <StackPanel Orientation="Horizontal" Spacing="12">
+                    <PathIcon Data="{StaticResource IconActivity}" Width="15" Height="15" Foreground="#8BC34A" VerticalAlignment="Center" />
+                    <TextBlock Text="Log Audit Aktivitas" VerticalAlignment="Center" />
+                  </StackPanel>
+                </Button>
+                <Button Classes="nav" Classes.active="{Binding IsNavPengguna}" Command="{Binding NavigasiKeCommand}" CommandParameter="Pengguna">
+                  <StackPanel Orientation="Horizontal" Spacing="12">
+                    <PathIcon Data="{StaticResource IconShield}" Width="15" Height="15" Foreground="#8BC34A" VerticalAlignment="Center" />
+                    <TextBlock Text="Manajemen Pengguna" VerticalAlignment="Center" />
+                  </StackPanel>
+                </Button>
+              </StackPanel>
+
+              <TextBlock Text="Preferensi" Foreground="#B0C6B5" FontSize="13" FontWeight="Bold" Margin="10,14,0,4" LetterSpacing="0.6" />
+              <Button Classes="nav" Classes.active="{Binding IsNavPengaturan}" Command="{Binding NavigasiKeCommand}" CommandParameter="Pengaturan">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                  <PathIcon Data="{StaticResource IconSettings}" Width="15" Height="15" Foreground="#8BC34A" VerticalAlignment="Center" />
+                  <TextBlock Text="Pengaturan &amp; Tema" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+            </StackPanel>
+          </ScrollViewer>
+
+          <!-- Profil Pengguna Aktif & Logout -->
+          <Border Grid.Row="2" Background="#17261B" BorderBrush="#263E2C" BorderThickness="1" CornerRadius="10" Padding="14" Margin="0,12,0,0">
+            <StackPanel Spacing="6">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Border Width="8" Height="8" CornerRadius="4" Background="#4ADE80" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding NamaPenggunaAktif}" Foreground="#FFFFFF" FontWeight="Bold" FontSize="13" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding NamaPenggunaAktif}" />
+              </StackPanel>
+              <TextBlock Text="{Binding PeranPenggunaAktif}" Foreground="#8BC34A" FontSize="13" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding PeranPenggunaAktif}" />
+              <Button Classes="danger" Content="⏻  Keluar (Logout)" Command="{Binding ProsesLogoutCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,6,0,0" FontSize="13" />
+            </StackPanel>
+          </Border>
+        </Grid>
+      </Border>
+
+      <!-- AREA KANAN: HEADER + KONTEN UTAMA -->
+      <Grid Grid.Column="1" RowDefinitions="Auto,*">
+
+        <!-- HEADER ATAS -->
+        <Border Grid.Row="0" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Padding="26,14">
+          <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto">
+            <StackPanel Grid.Column="0" Grid.ColumnSpan="3" Spacing="2" VerticalAlignment="Center">
+              <TextBlock Text="{Binding Breadcrumb}" Foreground="{DynamicResource AccentBrush}" FontSize="13" FontWeight="Bold" />
+              <TextBlock Text="{Binding PageTitle}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="24" FontWeight="ExtraBold" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding PageTitle}" />
+            </StackPanel>
+
+            <TextBox Grid.Row="1" Grid.Column="0" Name="GlobalSearchBox" Text="{Binding GlobalSearchQuery}"
+                     Watermark="Cari NRP atau nama praktikan · Ctrl+K" VerticalAlignment="Center" Padding="12,8" Margin="0,12,12,0" />
+
+            <Button Grid.Row="1" Grid.Column="1" Classes="secondary" Command="{Binding ToggleTemaCommand}" VerticalAlignment="Center" Margin="0,12,12,0">
+              <StackPanel Orientation="Horizontal" Spacing="7">
+                <PathIcon Data="{StaticResource IconTheme}" Width="13" Height="13" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" />
+                <TextBlock Text="{Binding TemaAktif, StringFormat='Tema: {0}'}" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+
+            <Button Grid.Row="1" Grid.Column="2" Classes="primary" Content="⬇ Ekspor CSV"
+                    Command="{Binding EksporRekapCsvCommand}" VerticalAlignment="Center" Margin="0,12,0,0" />
+          </Grid>
+        </Border>
+
+        <!-- KONTEN DINAMIS (SCROLLABLE) -->
+        <ScrollViewer Grid.Row="1" Margin="26,20" HorizontalScrollBarVisibility="Disabled">
+          <Panel>
+
+            <!-- ========================================================== -->
+            <!-- HALAMAN 1: DASHBOARD                                       -->
+            <!-- ========================================================== -->
+            <StackPanel IsVisible="{Binding ActivePage, Converter={StaticResource EqConv}, ConverterParameter=Dashboard}" Spacing="18">
+              <!-- Executive 180DC Hero Command Banner -->
+              <Border Background="#132217" BorderBrush="#2A4632" BorderThickness="1.2" CornerRadius="14" Padding="22,16" BoxShadow="0 6 18 0 #22000000">
+                <Grid RowDefinitions="Auto,Auto">
+                  <StackPanel Spacing="5" VerticalAlignment="Center">
+                    <WrapPanel Orientation="Horizontal">
+                      <Border Background="#456D1B" Margin="0,0,8,8" CornerRadius="99" Padding="10,2">
+                        <TextBlock Text="Ringkasan praktikum" Foreground="#FFFFFF" FontSize="13" FontWeight="ExtraBold" LetterSpacing="0.6" />
+                      </Border>
+                      <Border Background="#1E3524" Margin="0,0,0,8" BorderBrush="#395E42" BorderThickness="1" CornerRadius="99" Padding="10,2">
+                        <TextBlock Text="{Binding InputAmbangR2, StringFormat='Ambang ketuntasan: {0}%'}" Foreground="#A7D96C" FontSize="13" FontWeight="Bold" />
+                      </Border>
+                    </WrapPanel>
+                    <TextBlock Text="{Binding NamaProgramHeader}" TextWrapping="Wrap" Foreground="#FFFFFF" FontSize="17" FontWeight="ExtraBold" />
+                    <TextBlock Text="Pantau pengumpulan, nilai, dan praktikan yang membutuhkan perhatian." Foreground="#A3B8A8" FontSize="13" />
+                  </StackPanel>
+                  <StackPanel Grid.Row="1" Margin="0,16,0,0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <Button Classes="primary" Content="Catat pengumpulan &amp; nilai" Command="{Binding NavigasiKeCommand}" CommandParameter="Penilaian" FontSize="13" />
+                    <Button Classes="secondary" Content="+ Tambah Praktikan" Command="{Binding BukaTambahPraktikanCommand}" FontSize="13" />
+                  </StackPanel>
+                </Grid>
+              </Border>
+
+              <!-- 4 Kartu Ringkasan Utama (Top Accent Border + Inline Progress Bar + Donut Gauge) -->
+              <UniformGrid Columns="4" Rows="1">
+                <Border Classes="kpi-card" BorderBrush="{DynamicResource AccentBrush}" Margin="0,0,12,0">
+                  <StackPanel Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <StackPanel Spacing="3">
+                        <TextBlock Text="Total praktikan" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" FontWeight="Bold" LetterSpacing="0.5" />
+                        <TextBlock Text="{Binding Dashboard.TotalPraktikan}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="32" FontWeight="ExtraBold" />
+                      </StackPanel>
+                      <Border Grid.Column="1" Width="40" Height="40" CornerRadius="10" Background="{DynamicResource AccentSoftBrush}" VerticalAlignment="Top">
+                        <PathIcon Data="{StaticResource IconUsers}" Width="18" Height="18" Foreground="{DynamicResource AccentBrush}" />
+                      </Border>
+                    </Grid>
+                    <ProgressBar Value="104" Maximum="124" />
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBlock Text="104 Status Aman" Foreground="{DynamicResource AccentBrush}" FontSize="13" FontWeight="Bold" />
+                      <TextBlock Grid.Column="1" Text="{Binding JumlahPraktikanBerisikoBadge, StringFormat='{}{0} Berisiko'}" Foreground="{DynamicResource DangerBrush}" FontSize="13" FontWeight="Bold" />
+                    </Grid>
+                  </StackPanel>
+                </Border>
+
+                <Border Classes="kpi-card" BorderBrush="{DynamicResource AccentBrush}" Margin="0,0,12,0">
+                  <StackPanel Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <StackPanel Spacing="3">
+                        <TextBlock Text="Kelompok" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" FontWeight="Bold" LetterSpacing="0.5" />
+                        <TextBlock Text="{Binding Dashboard.TotalKelompok}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="32" FontWeight="ExtraBold" />
+                      </StackPanel>
+                      <Border Grid.Column="1" Width="40" Height="40" CornerRadius="10" Background="{DynamicResource AccentSoftBrush}" VerticalAlignment="Top">
+                        <PathIcon Data="{StaticResource IconLayers}" Width="18" Height="18" Foreground="{DynamicResource AccentBrush}" />
+                      </Border>
+                    </Grid>
+                    <ProgressBar Value="12" Maximum="12" />
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBlock Text="1 Asisten = 1 Kelompok" TextWrapping="Wrap" Foreground="{DynamicResource AccentBrush}" FontSize="13" FontWeight="Bold" />
+                      <TextBlock Grid.Column="1" Text="100% Terisi" Margin="8,0,0,0" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" FontWeight="SemiBold" />
+                    </Grid>
+                  </StackPanel>
+                </Border>
+
+                <Border Classes="kpi-card" BorderBrush="{DynamicResource InfoBrush}" Margin="0,0,12,0">
+                  <StackPanel Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <StackPanel Spacing="3">
+                        <TextBlock Text="Modul berjalan" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" FontWeight="Bold" LetterSpacing="0.5" />
+                        <TextBlock Text="{Binding Dashboard.ModulAktif}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="32" FontWeight="ExtraBold" />
+                      </StackPanel>
+                      <Border Grid.Column="1" Width="40" Height="40" CornerRadius="10" Background="{DynamicResource InfoBgBrush}" VerticalAlignment="Top">
+                        <PathIcon Data="{StaticResource IconBook}" Width="18" Height="18" Foreground="{DynamicResource InfoBrush}" />
+                      </Border>
+                    </Grid>
+                    <ProgressBar Value="7" Maximum="8" Foreground="{DynamicResource InfoBrush}" />
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBlock Text="5 Selesai • 2 Berjalan" TextWrapping="Wrap" Foreground="{DynamicResource InfoBrush}" FontSize="13" FontWeight="Bold" />
+                      <TextBlock Grid.Column="1" Text="Total 8 Modul" Margin="8,0,0,0" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" FontWeight="SemiBold" />
+                    </Grid>
+                  </StackPanel>
+                </Border>
+
+                <!-- Kartu ke-4 dilengkapi Komponen Progress Ring (Donut Gauge) -->
+                <Border Classes="kpi-card" BorderBrush="{DynamicResource AccentBrush}">
+                  <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                    <StackPanel Spacing="5" VerticalAlignment="Center">
+                      <TextBlock Text="Rata-rata ketuntasan" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" FontWeight="Bold" LetterSpacing="0.5" />
+                      <TextBlock Text="{Binding Dashboard.RataKetuntasanGlobal, StringFormat='{}{0:0.00}%'}" Foreground="{DynamicResource AccentBrush}" FontSize="26" FontWeight="ExtraBold" />
+                      <Border Background="{DynamicResource AccentSoftBrush}" CornerRadius="6" Padding="8,2" HorizontalAlignment="Left">
+                        <TextBlock Text="{Binding Dashboard.RataNilaiGlobal, StringFormat='Rata Nilai: {0:0.00}'}" Foreground="{DynamicResource AccentBrush}" FontSize="13" FontWeight="Bold" TextWrapping="Wrap" />
+                      </Border>
+                    </StackPanel>
+                    <ctrl:SimprakProgressRing Grid.Column="1" Width="66" Height="66" Value="{Binding Dashboard.RataKetuntasanGlobal}" Max="100" Suffix="%" />
+                  </Grid>
+                </Border>
+              </UniformGrid>
+
+              <!-- 2 Grafik Kustom OnRender -->
+              <Grid ColumnDefinitions="1.35*,1*">
+                <Border Grid.Column="0" Classes="card" Margin="0,0,14,0">
+                  <StackPanel Spacing="10">
+                    <TextBlock Text="{Binding JudulGrafikKetuntasan}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="Bold" FontSize="16" />
+                    <TextBlock Text="Garis merah menunjukkan ambang 75%. Batang oranye berada di bawahnya." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" TextWrapping="Wrap" />
+                    <ctrl:SimprakBarChart Height="235" Items="{Binding Dashboard.GrafikKetuntasan}" ThresholdValue="75" MaxY="100" ValueSuffix="%" />
+                  </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Classes="card">
+                  <StackPanel Spacing="10">
+                    <TextBlock Text="Distribusi nilai akhir" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="Bold" FontSize="16" />
+                    <TextBlock Text="Jumlah praktikan pada setiap rentang nilai akhir." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" TextWrapping="Wrap" />
+                    <ctrl:SimprakBarChart Height="235" Items="{Binding Dashboard.DistribusiNilai}" MaxY="60" ValueSuffix="" />
+                  </StackPanel>
+                </Border>
+              </Grid>
+
+              <!-- Daftar Ringkas Praktikan Berisiko & Aktivitas Terbaru -->
+              <Grid ColumnDefinitions="1.2*,1*">
+                <Border Grid.Column="0" Classes="card" Margin="0,0,14,0">
+                  <StackPanel Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <PathIcon Data="{StaticResource IconAlertTriangle}" Width="15" Height="15" Foreground="{DynamicResource DangerBrush}" VerticalAlignment="Center" />
+                        <TextBlock Text="Praktikan Rawan Mengulang / Berisiko Teratas" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="Bold" FontSize="16" />
+                      </StackPanel>
+                      <Button Grid.Column="1" Classes="secondary" Content="Lihat Semua →" Command="{Binding NavigasiKeCommand}" CommandParameter="Berisiko" FontSize="13" Padding="10,4" />
+                    </Grid>
+                    <ItemsControl ItemsSource="{Binding Dashboard.DaftarBerisikoTeratas}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Border Background="{DynamicResource SurfaceAltBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="8" Padding="12,9" Margin="0,0,0,7">
+                            <Grid ColumnDefinitions="108,*,Auto">
+                              <TextBlock Text="{Binding Nrp}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                              <StackPanel Grid.Column="1" Spacing="2" Margin="0,0,10,0">
+                                <TextBlock Text="{Binding NamaLengkap}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding NamaLengkap}" />
+                                <TextBlock Text="{Binding AlasanRisiko}" FontSize="13" FontWeight="Medium" Foreground="{DynamicResource DangerBrush}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding AlasanRisiko}" />
+                              </StackPanel>
+                              <StackPanel Grid.Column="2" HorizontalAlignment="Right">
+                                <TextBlock Text="{Binding NilaiAkhir, StringFormat='Nilai: {0:0.00}'}" FontWeight="ExtraBold" Foreground="{DynamicResource DangerBrush}" HorizontalAlignment="Right" />
+                                <TextBlock Text="{Binding Ketuntasan, StringFormat='Tuntas: {0:0.#}%'}" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Right" />
+                              </StackPanel>
+                            </Grid>
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Classes="card">
+                  <StackPanel Spacing="10">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <PathIcon Data="{StaticResource IconActivity}" Width="15" Height="15" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" />
+                      <TextBlock Text="Jejak Aktivitas Evaluasi Terbaru" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="Bold" FontSize="16" />
+                    </StackPanel>
+                    <ItemsControl ItemsSource="{Binding Dashboard.AktivitasTerbaru}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Border BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Padding="0,8">
+                            <StackPanel Spacing="3">
+                              <Grid ColumnDefinitions="Auto,*,Auto">
+                                <Border Background="{DynamicResource AccentSoftBrush}" CornerRadius="5" Padding="7,2" Margin="0,0,8,0">
+                                  <TextBlock Text="{Binding Aksi}" Foreground="{DynamicResource AccentBrush}" FontSize="13" FontWeight="ExtraBold" />
+                                </Border>
+                                <TextBlock Grid.Column="1" Text="{Binding NamaPengguna}" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" Margin="0,0,8,0" ToolTip.Tip="{Binding NamaPengguna}" />
+                                <TextBlock Grid.Column="2" Text="{Binding Waktu}" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
+                              </Grid>
+                              <TextBlock Text="{Binding Keterangan}" FontSize="13" LineHeight="18" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                </Border>
+              </Grid>
+            </StackPanel>
+
+            <!-- ========================================================== -->
+            <!-- HALAMAN 2: DAFTAR PRAKTIKAN                                -->
+            <!-- ========================================================== -->
+            <StackPanel IsVisible="{Binding ActivePage, Converter={StaticResource EqConv}, ConverterParameter=Praktikan}" Spacing="14">
+              <Border Classes="card" Padding="18,14">
+                <StackPanel Spacing="10">
+                  <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto,Auto">
+                    <TextBox Text="{Binding SearchPraktikanText}" Watermark="Cari NRP atau nama praktikan" Margin="0,0,12,0" />
+                    <Button Grid.Column="1" Classes="secondary" Content="Reset filter" Command="{Binding ResetFilterPraktikanCommand}" Margin="0,0,8,0" />
+                    <Button Grid.Column="2" Classes="primary" Content="+ Tambah praktikan" Command="{Binding BukaTambahPraktikanCommand}" />
+                    <Grid Grid.Row="1" Grid.ColumnSpan="3" ColumnDefinitions="*,*,*,*" Margin="0,16,0,0">
+                      <StackPanel Grid.Column="0" Spacing="6" Margin="0,0,12,0">
+                        <TextBlock Text="Kelompok" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <ComboBox ItemsSource="{Binding PilihanFilterKelompok}" SelectedItem="{Binding SelectedFilterKelompok}" HorizontalAlignment="Stretch" />
+                      </StackPanel>
+                      <StackPanel Grid.Column="1" Spacing="6" Margin="0,0,12,0">
+                        <TextBlock Text="Mata kuliah" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <ComboBox ItemsSource="{Binding PilihanFilterMatkul}" SelectedItem="{Binding SelectedFilterMatkul}" HorizontalAlignment="Stretch" />
+                      </StackPanel>
+                      <StackPanel Grid.Column="2" Spacing="6" Margin="0,0,12,0">
+                        <TextBlock Text="Angkatan" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <ComboBox ItemsSource="{Binding PilihanFilterAngkatan}" SelectedItem="{Binding SelectedFilterAngkatan}" HorizontalAlignment="Stretch" />
+                      </StackPanel>
+                      <StackPanel Grid.Column="3" Spacing="6" Margin="0,0,0,0">
+                        <TextBlock Text="Status risiko" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <ComboBox ItemsSource="{Binding PilihanFilterStatus}" SelectedItem="{Binding SelectedFilterStatus}" HorizontalAlignment="Stretch" />
+                      </StackPanel>
+                    </Grid>
+                  </Grid>
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="{Binding RingkasanFilterPraktikan}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBlock Grid.Column="1" Text="Geser tabel ke kanan untuk melihat status dan tindakan." FontSize="13" Foreground="{DynamicResource AccentBrush}" FontWeight="Medium" TextWrapping="Wrap" />
+                  </Grid>
+                </StackPanel>
+              </Border>
+
+              <Border Classes="card" Padding="0">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" MaxHeight="520" AllowAutoHide="False">
+                <StackPanel MinWidth="1400" Width="{Binding $parent[ScrollViewer].Viewport.Width}">
+                  <Border Background="{DynamicResource SurfaceAltBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Padding="18,12">
+                    <Grid ColumnDefinitions="122,1.4*,1.45*,1.1*,86,132,100,114,224">
+                      <TextBlock Text="NRP" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,8,0" />
+                      <TextBlock Grid.Column="1" Text="Nama lengkap" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,12,0" />
+                      <TextBlock Grid.Column="2" Text="Kelompok" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,12,0" />
+                      <TextBlock Grid.Column="3" Text="Mata kuliah" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,12,0" />
+                      <TextBlock Grid.Column="4" Text="Angkatan" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,8,0" />
+                      <TextBlock Grid.Column="5" Text="Ketuntasan" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,12,0" />
+                      <TextBlock Grid.Column="6" Text="Nilai akhir" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,8,0" />
+                      <TextBlock Grid.Column="7" Text="Status" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,8,0" />
+                      <TextBlock Grid.Column="8" Text="Tindakan" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </Grid>
+                  </Border>
+
+                  <!-- Empty State Ketika Filter Tidak Menemukan Praktikan -->
+                  <Border IsVisible="{Binding IsFilterPraktikanKosong}" Padding="36" HorizontalAlignment="Center">
+                    <StackPanel Spacing="8" HorizontalAlignment="Center">
+                      <TextBlock Text="Tidak ada data praktikan yang cocok dengan kriteria pencarian/filter." FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                      <Button Classes="secondary" Content="↺ Tampilkan Semua Praktikan" Command="{Binding ResetFilterPraktikanCommand}" HorizontalAlignment="Center" />
+                    </StackPanel>
+                  </Border>
+
+                  <ItemsControl ItemsSource="{Binding FilteredPraktikan}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border Classes="table-row">
+                          <Grid ColumnDefinitions="122,1.4*,1.45*,1.1*,86,132,100,114,224" VerticalAlignment="Center">
+                            <Border Background="{DynamicResource SurfaceAltBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="6" Padding="7,2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,8,0">
+                              <TextBlock Text="{Binding Nrp}" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}" />
+                            </Border>
+                            <TextBlock Grid.Column="1" Text="{Binding NamaLengkap}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,12,0" ToolTip.Tip="{Binding NamaLengkap}" />
+                            <TextBlock Grid.Column="2" Text="{Binding NamaKelompok}" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,12,0" ToolTip.Tip="{Binding NamaKelompok}" />
+                            <TextBlock Grid.Column="3" Text="{Binding MataKuliah}" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,12,0" ToolTip.Tip="{Binding MataKuliah}" />
+                            <TextBlock Grid.Column="4" Text="{Binding Angkatan}" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <StackPanel Grid.Column="5" Spacing="3" VerticalAlignment="Center" Margin="0,0,12,0">
+                              <TextBlock Text="{Binding Ketuntasan, StringFormat='{}{0:0.0}%'}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                              <ProgressBar Value="{Binding Ketuntasan}" Maximum="100" Width="95" MinWidth="0" HorizontalAlignment="Left" Height="5" MinHeight="5" />
+                            </StackPanel>
+                            <Border Grid.Column="6" Background="{DynamicResource AccentSoftBrush}" CornerRadius="6" Padding="8,2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,8,0">
+                              <TextBlock Text="{Binding NilaiAkhir, StringFormat='{}{0:0.00}'}" FontWeight="ExtraBold" FontSize="13" Foreground="{DynamicResource AccentBrush}" />
+                            </Border>
+                            <Border Grid.Column="7" CornerRadius="99" Padding="9,3" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,8,0"
+                                    Background="{Binding StatusLabel, Converter={StaticResource BadgeBgConv}}">
+                              <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="●" FontSize="9" VerticalAlignment="Center" Foreground="{Binding StatusLabel, Converter={StaticResource BadgeFgConv}}" />
+                                <TextBlock Text="{Binding StatusLabel}" FontSize="13" FontWeight="Bold"
+                                           Foreground="{Binding StatusLabel, Converter={StaticResource BadgeFgConv}}" />
+                              </StackPanel>
+                            </Border>
+                            <StackPanel Grid.Column="8" Orientation="Horizontal" Spacing="6">
+                              <Button Classes="secondary" Content="Detail" Padding="9,4" FontSize="13"
+                                      Command="{Binding $parent[Window].DataContext.BukaDetailPraktikanCommand}"
+                                      CommandParameter="{Binding IdPraktikan}" />
+                              <Button Classes="secondary" Content="Ubah" Padding="9,4" FontSize="13"
+                                      Command="{Binding $parent[Window].DataContext.BukaEditPraktikanCommand}"
+                                      CommandParameter="{Binding}" />
+                              <Button Classes="danger" Content="Hapus" Padding="9,4" FontSize="13"
+                                      Command="{Binding $parent[Window].DataContext.HapusPraktikanItemCommand}"
+                                      CommandParameter="{Binding}" />
+                            </StackPanel>
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+                </ScrollViewer>
+              </Border>
+            </StackPanel>
+
+            <!-- ========================================================== -->
+            <!-- HALAMAN 3: DETAIL PRAKTIKAN & TREN NILAI                   -->
+            <!-- ========================================================== -->
+            <StackPanel IsVisible="{Binding ActivePage, Converter={StaticResource EqConv}, ConverterParameter=DetailPraktikan}" Spacing="16">
+              <Button Classes="secondary" Content="← Kembali ke Daftar Praktikan" Command="{Binding NavigasiKeCommand}" CommandParameter="Praktikan" HorizontalAlignment="Left" />
+
+              <Grid ColumnDefinitions="1.15*,1.4*">
+                <Border Grid.Column="0" Classes="card" Margin="0,0,14,0">
+                  <StackPanel Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <StackPanel Spacing="3" Margin="0,0,10,0">
+                        <TextBlock Text="{Binding SelectedDetailPraktikan.Profil.NamaLengkap}" FontSize="21" FontWeight="ExtraBold" Foreground="{DynamicResource TextPrimaryBrush}" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding SelectedDetailPraktikan.Profil.Nrp, StringFormat='NRP: {0}'}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" />
+                        <TextBlock Text="{Binding SelectedDetailPraktikan.Profil.MataKuliah, StringFormat='Mata Kuliah: {0}'}" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding SelectedDetailPraktikan.Profil.NamaKelompok, StringFormat='Kelompok Shift: {0}'}" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding SelectedDetailPraktikan.NamaAsisten, StringFormat='Asisten Pembimbing: {0}'}" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" />
+                      </StackPanel>
+                      <ctrl:SimprakProgressRing Grid.Column="1" Width="76" Height="76" Value="{Binding SelectedDetailPraktikan.Profil.Ketuntasan}" Max="100" Suffix="%" />
+                    </Grid>
+
+                    <UniformGrid Columns="3" Margin="0,6,0,0">
+                      <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="8" Padding="10" Margin="0,0,6,0">
+                        <StackPanel>
+                          <TextBlock Text="Ketuntasan" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                          <TextBlock Text="{Binding SelectedDetailPraktikan.Profil.Ketuntasan, StringFormat='{}{0:0.00}%'}" FontSize="19" FontWeight="ExtraBold" Foreground="{DynamicResource AccentBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                      </Border>
+                      <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="8" Padding="10" Margin="0,0,6,0">
+                        <StackPanel>
+                          <TextBlock Text="Nilai akhir" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                          <TextBlock Text="{Binding SelectedDetailPraktikan.Profil.NilaiAkhir, StringFormat='{}{0:0.00}'}" FontSize="19" FontWeight="ExtraBold" Foreground="{DynamicResource TextPrimaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                      </Border>
+                      <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="8" Padding="10">
+                        <StackPanel>
+                          <TextBlock Text="TERLAMBAT" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                          <TextBlock Text="{Binding SelectedDetailPraktikan.Profil.JumlahTerlambat, StringFormat='{}{0} Modul'}" FontSize="19" FontWeight="ExtraBold" Foreground="{DynamicResource WarningBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                      </Border>
+                    </UniformGrid>
+
+                    <Border IsVisible="{Binding SelectedDetailPraktikan.Profil.IsBerisiko}"
+                            Background="{DynamicResource DangerBgBrush}" BorderBrush="{DynamicResource DangerBrush}" BorderThickness="1.2" CornerRadius="8" Padding="12">
+                      <StackPanel Spacing="4">
+                        <TextBlock Text="▲ Status Risiko Terdeteksi (BR-05):" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" />
+                        <TextBlock Text="{Binding SelectedDetailPraktikan.Profil.AlasanRisiko}" Foreground="{DynamicResource DangerBrush}" TextWrapping="Wrap" />
+                      </StackPanel>
+                    </Border>
+                  </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Classes="card">
+                  <StackPanel Spacing="8">
+                    <TextBlock Text="Grafik Tren Nilai Praktikan vs Rata-Rata Kelompok" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    <TextBlock Text="Membandingkan capaian nilai tiap modul terhadap rata-rata kelompok shift." FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" />
+                    <ctrl:SimprakLineChart Height="235" Items="{Binding SelectedDetailPraktikan.TrenNilaiVsKelompok}" />
+                  </StackPanel>
+                </Border>
+              </Grid>
+
+              <Border Classes="card" Padding="0">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" MaxHeight="520" AllowAutoHide="False">
+                <StackPanel MinWidth="1250" Width="{Binding $parent[ScrollViewer].Viewport.Width}">
+                  <Border Background="{DynamicResource SurfaceAltBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Padding="18,12">
+                    <Grid ColumnDefinitions="85,1.6*,138,168,85,1.2*,125">
+                      <TextBlock Text="Kode" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,8,0" />
+                      <TextBlock Grid.Column="1" Text="Modul praktikum" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,12,0" />
+                      <TextBlock Grid.Column="2" Text="Waktu kumpul" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,10,0" />
+                      <TextBlock Grid.Column="3" Text="Status pengumpulan" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,12,0" />
+                      <TextBlock Grid.Column="4" Text="Nilai" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,8,0" />
+                      <TextBlock Grid.Column="5" Text="Catatan" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,12,0" />
+                      <TextBlock Grid.Column="6" Text="TAUTAN TUGAS" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </Grid>
+                  </Border>
+                  <ItemsControl ItemsSource="{Binding SelectedDetailPraktikan.RiwayatModul}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border Classes="table-row">
+                          <Grid ColumnDefinitions="85,1.6*,138,168,85,1.2*,125" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding KodeModul}" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="1" Text="{Binding JudulModul}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,12,0" ToolTip.Tip="{Binding JudulModul}" />
+                            <TextBlock Grid.Column="2" Text="{Binding WaktuKumpul, TargetNullValue='-'}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0" />
+                            <Border Grid.Column="3" CornerRadius="99" Padding="9,3" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,12,0"
+                                    Background="{Binding StatusPengumpulan, Converter={StaticResource BadgeBgConv}}">
+                              <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="●" FontSize="9" VerticalAlignment="Center" Foreground="{Binding StatusPengumpulan, Converter={StaticResource BadgeFgConv}}" />
+                                <TextBlock Text="{Binding StatusPengumpulan}" FontSize="13" FontWeight="Bold"
+                                           Foreground="{Binding StatusPengumpulan, Converter={StaticResource BadgeFgConv}}" />
+                              </StackPanel>
+                            </Border>
+                            <TextBlock Grid.Column="4" Text="{Binding Nilai, StringFormat='{}{0:0.##}', TargetNullValue='Belum'}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="5" Text="{Binding Catatan, TargetNullValue='-'}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,12,0" ToolTip.Tip="{Binding Catatan, TargetNullValue='-'}" />
+                            <Button Grid.Column="6" Classes="secondary" Content="Buka Tautan ↗" FontSize="13" Padding="9,4"
+                                    ToolTip.Tip="Buka tautan tugas di browser" AutomationProperties.Name="Buka tautan tugas" Command="{Binding $parent[Window].DataContext.BukaTautanEksternalCommand}"
+                                    CommandParameter="{Binding TautanTugas}" />
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+                </ScrollViewer>
+              </Border>
+            </StackPanel>
+
+            <!-- ========================================================== -->
+            <!-- HALAMAN 4: KELOMPOK PRAKTIKUM                              -->
+            <!-- ========================================================== -->
+            <StackPanel IsVisible="{Binding ActivePage, Converter={StaticResource EqConv}, ConverterParameter=Kelompok}" Spacing="16">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="Kartu ringkasan setiap kelompok/shift praktikum beserta asisten pembimbing, progress ring ketuntasan, rata-rata nilai, dan praktikan berisiko."
+                           Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                <Button Grid.Column="1" Classes="primary" Content="+ Tambah Kelompok" Command="{Binding BukaTambahKelompokCommand}" IsVisible="{Binding IsAdmin}" />
+              </Grid>
+
+              <ItemsControl ItemsSource="{Binding DaftarKelompok}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <UniformGrid Columns="3" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border Classes="card" Margin="0,0,14,14">
+                      <StackPanel Spacing="12">
+                        <Grid ColumnDefinitions="*,Auto">
+                          <StackPanel Spacing="4" Margin="0,0,10,0">
+                            <Border Background="{DynamicResource AccentSoftBrush}" CornerRadius="6" Padding="8,2" HorizontalAlignment="Left">
+                              <TextBlock Text="{Binding NomorKelompok, StringFormat='SHIFT #{0:00}'}" Foreground="{DynamicResource AccentBrush}" FontWeight="ExtraBold" FontSize="13" />
+                            </Border>
+                            <TextBlock Text="{Binding NamaKelompok}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding NamaKelompok}" />
+                            <TextBlock Text="{Binding NamaAsisten, StringFormat='Asisten: {0}'}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" FontWeight="Medium" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding NamaAsisten, StringFormat='Asisten: {0}'}" />
+                          </StackPanel>
+                          <ctrl:SimprakProgressRing Grid.Column="1" Width="58" Height="58" Value="{Binding RataKetuntasan}" Max="100" Suffix="%" />
+                        </Grid>
+
+                        <UniformGrid Columns="3">
+                          <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="6" Padding="8" Margin="0,0,6,0">
+                            <StackPanel>
+                              <TextBlock Text="ANGGOTA" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                              <TextBlock Text="{Binding JumlahAnggota}" FontSize="18" FontWeight="ExtraBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                            </StackPanel>
+                          </Border>
+                          <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="6" Padding="8" Margin="0,0,6,0">
+                            <StackPanel>
+                              <TextBlock Text="RATA NILAI" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                              <TextBlock Text="{Binding RataNilaiAkhir, StringFormat='{}{0:0.0}'}" FontSize="18" FontWeight="ExtraBold" Foreground="{DynamicResource AccentBrush}" />
+                            </StackPanel>
+                          </Border>
+                          <Border Background="{DynamicResource SurfaceAltBrush}" CornerRadius="6" Padding="8">
+                            <StackPanel>
+                              <TextBlock Text="BERISIKO" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                              <TextBlock Text="{Binding JumlahBerisiko}" FontSize="18" FontWeight="ExtraBold" Foreground="{DynamicResource DangerBrush}" />
+                            </StackPanel>
+                          </Border>
+                        </UniformGrid>
+
+                        <Grid ColumnDefinitions="*,Auto,Auto">
+                          <TextBlock Text="{Binding RataKetuntasan, StringFormat='Ketuntasan: {0:0.00}%'}" VerticalAlignment="Center" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                          <Button Grid.Column="1" Classes="secondary" Content="Ubah" Padding="10,4" FontSize="13" Margin="0,0,6,0"
+                                  Command="{Binding $parent[Window].DataContext.BukaEditKelompokCommand}" CommandParameter="{Binding}" />
+                          <Button Grid.Column="2" Classes="danger" Content="Hapus" Padding="10,4" FontSize="13"
+                                  Command="{Binding $parent[Window].DataContext.HapusKelompokItemCommand}" CommandParameter="{Binding}" />
+                        </Grid>
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+
+            <!-- ========================================================== -->
+            <!-- HALAMAN 5: MODUL PENUGASAN                                 -->
+            <!-- ========================================================== -->
+            <StackPanel IsVisible="{Binding ActivePage, Converter={StaticResource EqConv}, ConverterParameter=Modul}" Spacing="16">
+              <Grid ColumnDefinitions="Auto,*,Auto">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <Button Classes="tab" Classes.active="{Binding IsTabSemua}" Content="Semua Modul (8)" Command="{Binding PilihTabModulCommand}" CommandParameter="Semua" />
+                  <Button Classes="tab" Classes.active="{Binding IsTabBerjalan}" Content="● Berjalan" Command="{Binding PilihTabModulCommand}" CommandParameter="Berjalan" />
+                  <Button Classes="tab" Classes.active="{Binding IsTabSelesai}" Content="✓ Selesai" Command="{Binding PilihTabModulCommand}" CommandParameter="Selesai" />
+                  <Button Classes="tab" Classes.active="{Binding IsTabBelumDimulai}" Content="◷ Belum Dimulai" Command="{Binding PilihTabModulCommand}" CommandParameter="Belum Dimulai" />
+                </StackPanel>
+                <Button Grid.Column="2" Classes="primary" Content="+ Tambah Modul" Command="{Binding BukaTambahModulCommand}" IsVisible="{Binding IsAdmin}" />
+              </Grid>
+
+              <Border Classes="card" Padding="0">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" MaxHeight="520" AllowAutoHide="False">
+                <StackPanel MinWidth="1350" Width="{Binding $parent[ScrollViewer].Viewport.Width}">
+                  <Border Background="{DynamicResource SurfaceAltBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Padding="18,12">
+                    <Grid ColumnDefinitions="82,1.85*,138,136,136,68,125,118,145">
+                      <TextBlock Text="Kode" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,8,0" />
+                      <TextBlock Grid.Column="1" Text="Judul modul" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,12,0" />
+                      <TextBlock Grid.Column="2" Text="Kategori" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,10,0" />
+                      <TextBlock Grid.Column="3" Text="MULAI" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,10,0" />
+                      <TextBlock Grid.Column="4" Text="Tenggat" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,10,0" />
+                      <TextBlock Grid.Column="5" Text="BOBOT" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,8,0" />
+                      <TextBlock Grid.Column="6" Text="PROGRES KUMPUL" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,10,0" />
+                      <TextBlock Grid.Column="7" Text="Status" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,10,0" />
+                      <TextBlock Grid.Column="8" Text="Tindakan" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </Grid>
+                  </Border>
+
+                  <ItemsControl ItemsSource="{Binding FilteredModul}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border Classes="table-row">
+                          <Grid ColumnDefinitions="82,1.85*,138,136,136,68,125,118,145" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding KodeModul}" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="1" Text="{Binding JudulModul}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,12,0" ToolTip.Tip="{Binding JudulModul}" />
+                            <TextBlock Grid.Column="2" Text="{Binding Kategori}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,10,0" ToolTip.Tip="{Binding Kategori}" />
+                            <TextBlock Grid.Column="3" Text="{Binding TanggalMulai}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0" />
+                            <TextBlock Grid.Column="4" Text="{Binding Tenggat}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0" />
+                            <TextBlock Grid.Column="5" Text="{Binding Bobot, StringFormat='{}{0}%'}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="6" Text="{Binding ProgresLabel}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0" />
+                            <Border Grid.Column="7" CornerRadius="99" Padding="9,3" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,10,0"
+                                    Background="{Binding StatusModul, Converter={StaticResource BadgeBgConv}}">
+                              <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="●" FontSize="9" VerticalAlignment="Center" Foreground="{Binding StatusModul, Converter={StaticResource BadgeFgConv}}" />
+                                <TextBlock Text="{Binding StatusModul}" FontSize="13" FontWeight="Bold"
+                                           Foreground="{Binding StatusModul, Converter={StaticResource BadgeFgConv}}" />
+                              </StackPanel>
+                            </Border>
+                            <StackPanel Grid.Column="8" Orientation="Horizontal" Spacing="6">
+                              <Button Classes="primary" Content="Nilai →" Padding="9,4" FontSize="13"
+                                      Command="{Binding $parent[Window].DataContext.PintasanNilaiModulCommand}" CommandParameter="{Binding}" />
+                              <Button Classes="secondary" Content="Ubah" Padding="9,4" FontSize="13"
+                                      Command="{Binding $parent[Window].DataContext.BukaEditModulCommand}" CommandParameter="{Binding}" />
+                            </StackPanel>
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+                </ScrollViewer>
+              </Border>
+            </StackPanel>
+
+            <!-- ========================================================== -->
+            <!-- HALAMAN 6: PENGUMPULAN, TAUTAN, & PENILAIAN (FR-26..FR-39) -->
+            <!-- ========================================================== -->
+            <StackPanel IsVisible="{Binding ActivePage, Converter={StaticResource EqConv}, ConverterParameter=Penilaian}" Spacing="14">
+              <Border Classes="card" Padding="18,14">
+                <StackPanel Spacing="10">
+                  <StackPanel Spacing="14">
+                    <Grid ColumnDefinitions="1.5*,1*">
+                      <StackPanel Spacing="6" Margin="0,0,16,0">
+                        <TextBlock Text="Modul praktikum" FontWeight="SemiBold" />
+                        <ComboBox ItemsSource="{Binding PilihanModulPenilaian}" SelectedItem="{Binding SelectedModulPenilaian}" HorizontalAlignment="Stretch">
+                          <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding JudulModul}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding JudulModul}" /></DataTemplate></ComboBox.ItemTemplate>
+                        </ComboBox>
+                      </StackPanel>
+                      <StackPanel Grid.Column="1" Spacing="6">
+                        <TextBlock Text="Kelompok" FontWeight="SemiBold" />
+                        <ComboBox ItemsSource="{Binding PilihanKelompokPenilaian}" SelectedItem="{Binding SelectedKelompokPenilaian}" HorizontalAlignment="Stretch">
+                          <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding NamaKelompok}" /></DataTemplate></ComboBox.ItemTemplate>
+                        </ComboBox>
+                      </StackPanel>
+                    </Grid>
+                    <TextBlock Text="Catat waktu pengumpulan sebelum mengisi nilai. Tautan tugas bersifat opsional. Geser tabel ke kanan untuk kolom lainnya." Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" LineHeight="21" />
+                    <WrapPanel Orientation="Horizontal">
+                      <Button Classes="primary" Content="Simpan perubahan" Command="{Binding SimpanSemuaPenilaianCommand}" IsEnabled="{Binding HasUnsavedGradingChanges}" Margin="0,0,12,0" />
+                      <Button Classes="secondary" Content="Batalkan perubahan" Command="{Binding BatalkanPerubahanPenilaianCommand}" IsEnabled="{Binding HasUnsavedGradingChanges}" Margin="0,0,12,0" />
+                      <Button Classes="secondary" Content="Tandai semua terkumpul" Command="{Binding TandaiSemuaTerkumpulCommand}" />
+                    </WrapPanel>
+                  </StackPanel>
+
+                  <!-- Indikator Baris Berubah (Unsaved Changes Banner) -->
+                  <Border IsVisible="{Binding HasUnsavedGradingChanges}" Background="{DynamicResource WarningBgBrush}" BorderBrush="{DynamicResource WarningBrush}" BorderThickness="1" CornerRadius="8" Padding="12,6">
+                    <TextBlock Text="{Binding JumlahBarisBerubah, StringFormat='{}{0} baris belum disimpan. Pilih Simpan perubahan untuk menyimpan.'}"
+                               Foreground="{DynamicResource WarningBrush}" FontWeight="Bold" FontSize="13" TextWrapping="Wrap" />
+                  </Border>
+                </StackPanel>
+              </Border>
+
+              <Border Classes="card" Padding="0">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" MaxHeight="520" AllowAutoHide="False">
+                <StackPanel MinWidth="1600" Width="{Binding $parent[ScrollViewer].Viewport.Width}">
+                  <Border Background="{DynamicResource SurfaceAltBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Padding="18,12">
+                    <Grid ColumnDefinitions="122,190,224,194,100,1.45*,1.15*,136">
+                      <TextBlock Text="NRP" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,8,0" />
+                      <TextBlock Grid.Column="1" Text="Nama praktikan" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,10,0" />
+                      <TextBlock Grid.Column="2" Text="Waktu kumpul" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,10,0" />
+                      <TextBlock Grid.Column="3" Text="Status pengumpulan" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,10,0" />
+                      <TextBlock Grid.Column="5" Text="Tautan tugas" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,10,0" />
+                      <TextBlock Grid.Column="4" Text="Nilai" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,10,0" />
+                      <TextBlock Grid.Column="6" Text="Catatan" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,10,0" />
+                      <TextBlock Grid.Column="7" Text="Penilai" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </Grid>
+                  </Border>
+
+                  <ItemsControl ItemsSource="{Binding BarisPenilaian}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border Classes="table-row" Padding="18,8">
+                          <Grid ColumnDefinitions="122,190,224,194,100,1.45*,1.15*,136" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Nrp}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="1" Text="{Binding NamaLengkap}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,10,0" ToolTip.Tip="{Binding NamaLengkap}" />
+                            <Grid Grid.Column="2" ColumnDefinitions="*,Auto" Margin="0,0,10,0">
+                              <TextBox Text="{Binding WaktuKumpulInput}" Watermark="dd/MM/yyyy HH:mm" FontSize="13" Margin="0,0,4,0" />
+                              <Button Grid.Column="1" Classes="secondary" Content="✓" Padding="7,4" FontSize="13"
+                                      ToolTip.Tip="Tandai terkumpul sekarang" AutomationProperties.Name="Tandai terkumpul" Command="{Binding TandaiTerkumpulSekarangCommand}" />
+                            </Grid>
+                            <Border Grid.Column="3" CornerRadius="99" Padding="8,3" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                    Background="{Binding StatusPengumpulan, Converter={StaticResource BadgeBgConv}}" Margin="0,0,10,0">
+                              <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="●" FontSize="9" VerticalAlignment="Center" Foreground="{Binding StatusPengumpulan, Converter={StaticResource BadgeFgConv}}" />
+                                <TextBlock Text="{Binding StatusPengumpulan}" FontSize="13" FontWeight="Bold"
+                                           Foreground="{Binding StatusPengumpulan, Converter={StaticResource BadgeFgConv}}" />
+                              </StackPanel>
+                            </Border>
+                            <Grid Grid.Column="5" ColumnDefinitions="*,Auto" Margin="0,0,10,0">
+                              <TextBox Text="{Binding TautanTugasInput}" Watermark="https://github.com/..." FontSize="13" Margin="0,0,4,0" />
+                              <Button Grid.Column="1" Classes="secondary" Content="↗" Padding="8,4" FontSize="13"
+                                      ToolTip.Tip="Buka tautan tugas di browser" AutomationProperties.Name="Buka tautan tugas" Command="{Binding $parent[Window].DataContext.BukaTautanEksternalCommand}"
+                                      CommandParameter="{Binding TautanTugasInput}" />
+                            </Grid>
+                            <TextBox Grid.Column="4" Text="{Binding NilaiInput}" IsEnabled="{Binding BisaIsiNilai}" Watermark="0-100" FontSize="13" Margin="0,0,10,0" />
+                            <TextBox Grid.Column="6" Text="{Binding CatatanInput}" IsEnabled="{Binding BisaIsiNilai}" Watermark="Catatan asisten..." FontSize="13" Margin="0,0,10,0" />
+                            <TextBlock Grid.Column="7" Text="{Binding NamaPenilai}" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding NamaPenilai}" />
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+                </ScrollViewer>
+              </Border>
+            </StackPanel>
+
+            <!-- ========================================================== -->
+            <!-- HALAMAN 7: PRAKTIKAN BERISIKO (R1, R2, R3)                 -->
+            <!-- ========================================================== -->
+            <StackPanel IsVisible="{Binding ActivePage, Converter={StaticResource EqConv}, ConverterParameter=Berisiko}" Spacing="16">
+              <UniformGrid Columns="3">
+                <Border Classes="kpi-card" BorderBrush="{DynamicResource DangerBrush}" Margin="0,0,12,0">
+                  <StackPanel Spacing="6">
+                    <TextBlock Text="R1 · Tugas belum dikumpulkan" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" />
+                    <TextBlock Text="{Binding JumlahR1, StringFormat='{}{0} Praktikan'}" FontSize="28" FontWeight="ExtraBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    <TextBlock Text="Melewatkan minimal 2 modul yang sudah jatuh tempo" TextWrapping="Wrap" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
+                  </StackPanel>
+                </Border>
+                <Border Classes="kpi-card" BorderBrush="{DynamicResource WarningBrush}" Margin="0,0,12,0">
+                  <StackPanel Spacing="6">
+                    <TextBlock Text="R2 · Ketuntasan rendah" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource WarningBrush}" />
+                    <TextBlock Text="{Binding JumlahR2, StringFormat='{}{0} Praktikan'}" FontSize="28" FontWeight="ExtraBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    <TextBlock Text="{Binding InputAmbangR2, StringFormat='Ketuntasan di bawah ambang {0}%'}" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" />
+                  </StackPanel>
+                </Border>
+                <Border Classes="kpi-card" BorderBrush="{DynamicResource DangerBrush}">
+                  <StackPanel Spacing="6">
+                    <TextBlock Text="R3 · Nilai di bawah ambang" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" />
+                    <TextBlock Text="{Binding JumlahR3, StringFormat='{}{0} Praktikan'}" FontSize="28" FontWeight="ExtraBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    <TextBlock Text="{Binding InputAmbangR3, StringFormat='Nilai akhir di bawah {0} (minimal 2 modul dinilai)'}" TextWrapping="Wrap" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
+                  </StackPanel>
+                </Border>
+              </UniformGrid>
+
+              <Border Classes="card" Padding="0">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" MaxHeight="520" AllowAutoHide="False">
+                <StackPanel MinWidth="1400" Width="{Binding $parent[ScrollViewer].Viewport.Width}">
+                  <Border Background="{DynamicResource SurfaceAltBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Padding="18,12">
+                    <Grid ColumnDefinitions="110,1.35*,1.3*,1.15*,95,95,90,1.95*">
+                      <TextBlock Text="NRP" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,8,0" />
+                      <TextBlock Grid.Column="1" Text="Nama praktikan" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,12,0" />
+                      <TextBlock Grid.Column="2" Text="Kelompok" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,12,0" />
+                      <TextBlock Grid.Column="3" Text="Asisten" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,12,0" />
+                      <TextBlock Grid.Column="4" Text="Belum kumpul" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,8,0" />
+                      <TextBlock Grid.Column="5" Text="Ketuntasan" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,8,0" />
+                      <TextBlock Grid.Column="6" Text="Nilai akhir" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,8,0" />
+                      <TextBlock Grid.Column="7" Text="Alasan risiko" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </Grid>
+                  </Border>
+
+                  <ItemsControl ItemsSource="{Binding DaftarBerisiko}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border Classes="table-row">
+                          <Grid ColumnDefinitions="110,1.35*,1.3*,1.15*,95,95,90,1.95*" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Nrp}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="1" Text="{Binding NamaLengkap}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,12,0" ToolTip.Tip="{Binding NamaLengkap}" />
+                            <TextBlock Grid.Column="2" Text="{Binding NamaKelompok}" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,12,0" ToolTip.Tip="{Binding NamaKelompok}" />
+                            <TextBlock Grid.Column="3" Text="{Binding NamaAsisten}" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,12,0" ToolTip.Tip="{Binding NamaAsisten}" />
+                            <TextBlock Grid.Column="4" Text="{Binding ModulBelumKumpul, StringFormat='{}{0} Modul'}" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="5" Text="{Binding Ketuntasan, StringFormat='{}{0:0.00}%'}" FontWeight="SemiBold" Foreground="{DynamicResource WarningBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="6" Text="{Binding NilaiAkhir, StringFormat='{}{0:0.00}'}" FontWeight="Bold" Foreground="{DynamicResource DangerBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="7" Text="{Binding AlasanRisiko}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource DangerBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+                </ScrollViewer>
+              </Border>
+            </StackPanel>
+
+            <!-- ========================================================== -->
+            <!-- HALAMAN 8: LOG AKTIVITAS (KHUSUS ADMIN)                    -->
+            <!-- ========================================================== -->
+            <StackPanel IsVisible="{Binding ActivePage, Converter={StaticResource EqConv}, ConverterParameter=LogAktivitas}" Spacing="16">
+              <Border Classes="card">
+                <Grid ColumnDefinitions="*,220,Auto">
+                  <TextBox Text="{Binding FilterLogKeyword}" Watermark="Cari kata kunci log (mis. NRP, modul, perubahan nilai)..." Margin="0,0,10,0" />
+                  <ComboBox Grid.Column="1" ItemsSource="{Binding PilihanAksiLog}" SelectedItem="{Binding FilterLogAksi}" HorizontalAlignment="Stretch" Margin="0,0,10,0" />
+                  <Button Grid.Column="2" Classes="secondary" Content="↻ Segarkan Log" Command="{Binding MuatDaftarLogCommand}" />
+                </Grid>
+              </Border>
+
+              <Border Classes="card" Padding="0">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" MaxHeight="520" AllowAutoHide="False">
+                <StackPanel MinWidth="1050" Width="{Binding $parent[ScrollViewer].Viewport.Width}">
+                  <Border Background="{DynamicResource SurfaceAltBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Padding="18,12">
+                    <Grid ColumnDefinitions="148,200,115,115,*">
+                      <TextBlock Text="Waktu" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,10,0" />
+                      <TextBlock Grid.Column="1" Text="Pengguna" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,12,0" />
+                      <TextBlock Grid.Column="2" Text="Aksi" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,10,0" />
+                      <TextBlock Grid.Column="3" Text="Entitas" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,10,0" />
+                      <TextBlock Grid.Column="4" Text="Rincian perubahan" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </Grid>
+                  </Border>
+                  <ItemsControl ItemsSource="{Binding DaftarLog}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border Classes="table-row" Padding="18,9">
+                          <Grid ColumnDefinitions="148,200,115,115,*" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Waktu}" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                            <TextBlock Grid.Column="1" Text="{Binding NamaPengguna}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,12,0" ToolTip.Tip="{Binding NamaPengguna}" />
+                            <Border Grid.Column="2" Background="{DynamicResource AccentSoftBrush}" CornerRadius="6" Padding="8,2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,10,0">
+                              <TextBlock Text="{Binding Aksi}" FontWeight="ExtraBold" Foreground="{DynamicResource AccentBrush}" FontSize="13" />
+                            </Border>
+                            <TextBlock Grid.Column="3" Text="{Binding Entitas}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0" />
+                            <TextBlock Grid.Column="4" Text="{Binding Keterangan}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13" VerticalAlignment="Center" TextWrapping="Wrap" />
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+                </ScrollViewer>
+              </Border>
+            </StackPanel>
+
+            <!-- ========================================================== -->
+            <!-- HALAMAN 9: MANAJEMEN PENGGUNA (KHUSUS ADMIN)               -->
+            <!-- ========================================================== -->
+            <StackPanel IsVisible="{Binding ActivePage, Converter={StaticResource EqConv}, ConverterParameter=Pengguna}" Spacing="16">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="Kelola akun Koordinator Lab (Admin) dan Asisten Lab. Admin tidak dapat menonaktifkan atau menurunkan perannya sendiri."
+                           Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                <Button Grid.Column="1" Classes="primary" Content="+ Tambah Pengguna" Command="{Binding BukaTambahPenggunaCommand}" />
+              </Grid>
+
+              <Border Classes="card" Padding="0">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" MaxHeight="520" AllowAutoHide="False">
+                <StackPanel MinWidth="1120" Width="{Binding $parent[ScrollViewer].Viewport.Width}">
+                  <Border Background="{DynamicResource SurfaceAltBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Padding="18,12">
+                    <Grid ColumnDefinitions="145,1.5*,125,120,165,120">
+                      <TextBlock Text="Username" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,10,0" />
+                      <TextBlock Grid.Column="1" Text="Nama lengkap" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,12,0" />
+                      <TextBlock Grid.Column="2" Text="Peran" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,10,0" />
+                      <TextBlock Grid.Column="3" Text="STATUS AKUN" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,10,0" />
+                      <TextBlock Grid.Column="4" Text="Login terakhir" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,10,0" />
+                      <TextBlock Grid.Column="5" Text="Tindakan" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </Grid>
+                  </Border>
+                  <ItemsControl ItemsSource="{Binding DaftarPengguna}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Border Classes="table-row">
+                          <Grid ColumnDefinitions="145,1.5*,125,120,165,120" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Username}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                            <TextBlock Grid.Column="1" Text="{Binding NamaLengkap}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,12,0" ToolTip.Tip="{Binding NamaLengkap}" />
+                            <TextBlock Grid.Column="2" Text="{Binding Peran}" Foreground="{DynamicResource AccentBrush}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
+                            <Border Grid.Column="3" CornerRadius="99" Padding="9,3" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,10,0"
+                                    Background="{Binding StatusLabel, Converter={StaticResource BadgeBgConv}}">
+                              <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="●" FontSize="9" VerticalAlignment="Center" Foreground="{Binding StatusLabel, Converter={StaticResource BadgeFgConv}}" />
+                                <TextBlock Text="{Binding StatusLabel}" FontSize="13" FontWeight="Bold"
+                                           Foreground="{Binding StatusLabel, Converter={StaticResource BadgeFgConv}}" />
+                              </StackPanel>
+                            </Border>
+                            <TextBlock Grid.Column="4" Text="{Binding LoginTerakhir, TargetNullValue='-'}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0" />
+                            <Button Grid.Column="5" Classes="secondary" Content="Ubah Akun" Padding="10,4" FontSize="13"
+                                    Command="{Binding $parent[Window].DataContext.BukaEditPenggunaCommand}" CommandParameter="{Binding}" />
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+                </ScrollViewer>
+              </Border>
+            </StackPanel>
+
+            <!-- ========================================================== -->
+            <!-- HALAMAN 10: PENGATURAN & TEMA                              -->
+            <!-- ========================================================== -->
+            <StackPanel IsVisible="{Binding ActivePage, Converter={StaticResource EqConv}, ConverterParameter=Pengaturan}" Spacing="16">
+              <Grid ColumnDefinitions="1*,1*">
+                <Border Grid.Column="0" Classes="card" IsEnabled="{Binding IsAdmin}" Margin="0,0,14,0">
+                  <StackPanel Spacing="14">
+                    <TextBlock Text="Ambang risiko &amp; nama program" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    <TextBlock Text="Perubahan ambang R2 dan R3 langsung memperbarui perhitungan status risiko seluruh praktikan secara real-time." FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" />
+                    <StackPanel Spacing="5">
+                      <TextBlock Text="Nama Program Laboratorium" FontSize="13" FontWeight="SemiBold" />
+                      <TextBox Text="{Binding InputNamaProgram}" Padding="10,8" />
+                    </StackPanel>
+                    <StackPanel Spacing="5">
+                      <TextBlock Text="Ambang Ketuntasan Minimum R2 (%)" FontSize="13" FontWeight="SemiBold" />
+                      <TextBox Text="{Binding InputAmbangR2}" Padding="10,8" />
+                    </StackPanel>
+                    <StackPanel Spacing="5">
+                      <TextBlock Text="Ambang Nilai Akhir Minimum R3 (0–100)" FontSize="13" FontWeight="SemiBold" />
+                      <TextBox Text="{Binding InputAmbangR3}" Padding="10,8" />
+                    </StackPanel>
+                    <Button Classes="primary" Content="Simpan Konfigurasi Risiko" Command="{Binding SimpanPengaturanAmbangCommand}" HorizontalAlignment="Left" />
+                  </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Classes="card">
+                  <StackPanel Spacing="14">
+                    <TextBlock Text="Tampilan &amp; akun" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    <UniformGrid Columns="2">
+                      <Button Classes="tab" Classes.active="{Binding IsTemaTerang}" Content="☀  Tema Terang (Light)"
+                              Command="{Binding PilihTemaLangsungCommand}" CommandParameter="Terang" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,0,8,0" />
+                      <Button Classes="tab" Classes.active="{Binding IsTemaGelap}" Content="☾  Tema Gelap (Dark)"
+                              Command="{Binding PilihTemaLangsungCommand}" CommandParameter="Gelap" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" />
+                    </UniformGrid>
+
+                    <Border BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0">
+                      <StackPanel Spacing="10">
+                        <TextBlock Text="Keamanan Akun &amp; Ganti Password" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <StackPanel Spacing="4">
+                          <TextBlock Text="Password Saat Ini" FontSize="13" FontWeight="SemiBold" />
+                          <TextBox Text="{Binding InputPasswordLama}" PasswordChar="•" Padding="10,8" />
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                          <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="Password Baru" FontSize="13" FontWeight="SemiBold" />
+                            <TextBlock Grid.Column="1" Text="{Binding IndikatorKekuatanPassword, StringFormat='Kekuatan: {0}'}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" />
+                          </Grid>
+                          <TextBox Text="{Binding InputPasswordBaru}" PasswordChar="•" Padding="10,8" />
+                          <!-- 4-Bar Password Strength Meter -->
+                          <UniformGrid Columns="4" Height="6">
+                            <Border CornerRadius="3" Margin="0,0,4,0" Background="{DynamicResource BorderSubtleBrush}">
+                              <Border CornerRadius="3" Background="{DynamicResource AccentBrush}" IsVisible="{Binding IsPwdBar1}" />
+                            </Border>
+                            <Border CornerRadius="3" Margin="0,0,4,0" Background="{DynamicResource BorderSubtleBrush}">
+                              <Border CornerRadius="3" Background="{DynamicResource AccentBrush}" IsVisible="{Binding IsPwdBar2}" />
+                            </Border>
+                            <Border CornerRadius="3" Margin="0,0,4,0" Background="{DynamicResource BorderSubtleBrush}">
+                              <Border CornerRadius="3" Background="{DynamicResource AccentBrush}" IsVisible="{Binding IsPwdBar3}" />
+                            </Border>
+                            <Border CornerRadius="3" Background="{DynamicResource BorderSubtleBrush}">
+                              <Border CornerRadius="3" Background="{DynamicResource AccentBrush}" IsVisible="{Binding IsPwdBar4}" />
+                            </Border>
+                          </UniformGrid>
+                        </StackPanel>
+                        <Button Classes="primary" Content="Perbarui Password" Command="{Binding ProsesGantiPasswordCommand}" HorizontalAlignment="Left" />
+                      </StackPanel>
+                    </Border>
+
+                    <Border BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0">
+                      <StackPanel Spacing="6">
+                        <TextBlock Text="Lokasi Berkas Database SQLite:" FontSize="13" FontWeight="Bold" />
+                        <TextBlock Text="{Binding LokasiDatabaseInfo}" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" />
+                        <Button Classes="danger" Content="Pulihkan Data Contoh Awal (Reset Seed)" Command="{Binding ResetDataContohCommand}" IsVisible="{Binding IsAdmin}" HorizontalAlignment="Left" />
+                      </StackPanel>
+                    </Border>
+                  </StackPanel>
+                </Border>
+              </Grid>
+            </StackPanel>
+
+          </Panel>
+        </ScrollViewer>
+      </Grid>
+    </Grid>
+
+    <!-- ================================================================== -->
+    <!-- 3. FLOATING PERSISTENT TOAST NOTIFICATION (KANAN BAWAH)            -->
+    <!-- ================================================================== -->
+    <Border IsVisible="{Binding IsToastVisible}"
+            HorizontalAlignment="Right" VerticalAlignment="Bottom"
+            Margin="0,0,28,24" MaxWidth="460"
+            Background="{DynamicResource SidebarBgBrush}"
+            BorderBrush="{DynamicResource AccentBrush}"
+            BorderThickness="2" CornerRadius="12" Padding="18,12"
+            BoxShadow="0 8 24 0 #40000000">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <TextBlock Text="✦" Foreground="#8BC34A" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" />
+        <TextBlock Grid.Column="1" Text="{Binding ToastMessage}" Foreground="#FFFFFF" FontWeight="SemiBold" FontSize="13" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,12,0" />
+        <Button Grid.Column="2" Classes="secondary" Content="✕" Command="{Binding TutupToastCommand}" Padding="8,3" FontSize="13" />
+      </Grid>
+    </Border>
+
+    <!-- ================================================================== -->
+    <!-- 4. LIMA DIALOG MODAL OVERLAY                                       -->
+    <!-- ================================================================== -->
+
+    <!-- Dialog 1: Tambah / Ubah Praktikan -->
+    <Border IsVisible="{Binding IsDialogPraktikanOpen}" Background="#88000000">
+      <Border Classes="card" Width="460" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="24">
+        <StackPanel Spacing="12">
+          <TextBlock Text="{Binding JudulDialogPraktikan}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+          <StackPanel Spacing="4">
+            <TextBlock Text="NRP (10 digit angka)" FontSize="13" FontWeight="SemiBold" />
+            <TextBox Text="{Binding FormPraktikanNrp}" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Text="Nama Lengkap Praktikan" FontSize="13" FontWeight="SemiBold" />
+            <TextBox Text="{Binding FormPraktikanNama}" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Text="Angkatan" FontSize="13" FontWeight="SemiBold" />
+            <NumericUpDown Value="{Binding FormPraktikanAngkatan}" Minimum="2018" Maximum="2030" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Text="Mata Kuliah" FontSize="13" FontWeight="SemiBold" />
+            <ComboBox ItemsSource="{Binding PilihanFilterMatkul}" SelectedItem="{Binding FormPraktikanMatkul}" HorizontalAlignment="Stretch" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Text="Kelompok Praktikum" FontSize="13" FontWeight="SemiBold" />
+            <ComboBox ItemsSource="{Binding DaftarKelompok}" SelectedItem="{Binding FormPraktikanKelompok}" HorizontalAlignment="Stretch">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding NamaKelompok}" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <Button Classes="secondary" Content="Batal" Command="{Binding TutupSemuaDialogCommand}" />
+            <Button Classes="primary" Content="Simpan Praktikan" Command="{Binding SimpanPraktikanCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Border>
+
+    <!-- Dialog 2: Tambah / Ubah Kelompok -->
+    <Border IsVisible="{Binding IsDialogKelompokOpen}" Background="#88000000">
+      <Border Classes="card" Width="460" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="24">
+        <StackPanel Spacing="12">
+          <TextBlock Text="{Binding JudulDialogKelompok}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+          <StackPanel Spacing="4">
+            <TextBlock Text="Nomor Kelompok" FontSize="13" FontWeight="SemiBold" />
+            <NumericUpDown Value="{Binding FormKelompokNomor}" Minimum="1" Maximum="99" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Text="Nama Kelompok / Shift" FontSize="13" FontWeight="SemiBold" />
+            <TextBox Text="{Binding FormKelompokNama}" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Text="Asisten pembimbing (opsional)" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
+            <ComboBox ItemsSource="{Binding PilihanAsistenTersedia}" SelectedItem="{Binding FormKelompokAsisten}"
+                      PlaceholderText="Pilih asisten yang tersedia" IsEnabled="{Binding !TidakAdaAsistenTersedia}" HorizontalAlignment="Stretch">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding NamaLengkap}" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+            <Border IsVisible="{Binding TidakAdaAsistenTersedia}" Background="{DynamicResource WarningBgBrush}" CornerRadius="7" Padding="12" Margin="0,4,0,0">
+              <TextBlock Text="Belum ada asisten aktif yang tersedia. Setiap asisten hanya dapat membimbing satu kelompok. Tambahkan akun asisten baru atau simpan kelompok tanpa asisten terlebih dahulu."
+                         Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13" LineHeight="20" TextWrapping="Wrap" />
+            </Border>
+            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+              <Button Classes="secondary" Content="+ Tambah asisten" Command="{Binding BukaTambahPenggunaCommand}" />
+              <Button Classes="secondary" Content="Tanpa asisten" Command="{Binding KosongkanAsistenKelompokCommand}" />
+            </StackPanel>
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <Button Classes="secondary" Content="Batal" Command="{Binding TutupSemuaDialogCommand}" />
+            <Button Classes="primary" Content="Simpan Kelompok" Command="{Binding SimpanKelompokCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Border>
+
+    <!-- Dialog 3: Tambah / Ubah Modul -->
+    <Border IsVisible="{Binding IsDialogModulOpen}" Background="#88000000">
+      <Border Classes="card" Width="480" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="24">
+        <StackPanel Spacing="12">
+          <TextBlock Text="{Binding JudulDialogModul}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+          <StackPanel Spacing="4">
+            <TextBlock Text="Kode Modul" FontSize="13" FontWeight="SemiBold" />
+            <TextBox Text="{Binding FormModulKode}" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Text="Judul Modul" FontSize="13" FontWeight="SemiBold" />
+            <TextBox Text="{Binding FormModulJudul}" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Text="Kategori Modul" FontSize="13" FontWeight="SemiBold" />
+            <ComboBox ItemsSource="{Binding PilihanKategoriModul}" SelectedItem="{Binding FormModulKategori}" HorizontalAlignment="Stretch" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Text="Tanggal Mulai (yyyy-MM-dd HH:mm)" FontSize="13" FontWeight="SemiBold" />
+            <TextBox Text="{Binding FormModulMulai}" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Text="Tenggat Pengumpulan (yyyy-MM-dd HH:mm)" FontSize="13" FontWeight="SemiBold" />
+            <TextBox Text="{Binding FormModulTenggat}" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Text="Bobot Nilai (1–100)" FontSize="13" FontWeight="SemiBold" />
+            <NumericUpDown Value="{Binding FormModulBobot}" Minimum="1" Maximum="100" />
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <Button Classes="secondary" Content="Batal" Command="{Binding TutupSemuaDialogCommand}" />
+            <Button Classes="primary" Content="Simpan Modul" Command="{Binding SimpanModulCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Border>
+
+    <!-- Dialog 4: Tambah / Ubah Pengguna -->
+    <Border IsVisible="{Binding IsDialogPenggunaOpen}" Background="#88000000">
+      <Border Classes="card" Width="450" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="24">
+        <StackPanel Spacing="12">
+          <TextBlock Text="{Binding JudulDialogPengguna}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+          <StackPanel Spacing="4">
+            <TextBlock Text="Username" FontSize="13" FontWeight="SemiBold" />
+            <TextBox Text="{Binding FormPenggunaUsername}" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Text="Nama Lengkap" FontSize="13" FontWeight="SemiBold" />
+            <TextBox Text="{Binding FormPenggunaNama}" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Text="Password baru (kosongkan untuk tetap memakai yang lama)" FontSize="13" FontWeight="SemiBold" />
+            <TextBox Text="{Binding FormPenggunaPassword}" PasswordChar="•" />
+          </StackPanel>
+          <StackPanel Spacing="4">
+            <TextBlock Text="Peran Pengguna" FontSize="13" FontWeight="SemiBold" />
+            <ComboBox ItemsSource="{Binding PilihanPeranPengguna}" SelectedItem="{Binding FormPenggunaPeran}" HorizontalAlignment="Stretch" />
+          </StackPanel>
+          <CheckBox IsChecked="{Binding FormPenggunaAktif}" Content="Status Akun Aktif" />
+          <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <Button Classes="secondary" Content="Batal" Command="{Binding TutupSemuaDialogCommand}" />
+            <Button Classes="primary" Content="Simpan Akun" Command="{Binding SimpanPenggunaCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Border>
+
+    <!-- Dialog 5: Konfirmasi Perubahan Belum Disimpan / Hapus Data -->
+    <Border IsVisible="{Binding IsDialogKonfirmasiOpen}" Background="#88000000">
+      <Border Classes="card" Width="440" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="24">
+        <StackPanel Spacing="14">
+          <TextBlock Text="{Binding JudulKonfirmasi}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+          <TextBlock Text="{Binding PesanKonfirmasi}" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" LineHeight="20" />
+          <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+            <Button Classes="secondary" Content="Batal" Command="{Binding BatalKonfirmasiCommand}" />
+            <Button Classes="primary" Content="Ya, Lanjutkan" Command="{Binding SetujuKonfirmasiCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Border>
+
+  </Grid>
+</Window>

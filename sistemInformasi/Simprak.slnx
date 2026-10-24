@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Simprak.App/Simprak.App.csproj" />
+    <Project Path="src/Simprak.Core/Simprak.Core.csproj" />
+    <Project Path="src/Simprak.Data/Simprak.Data.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Simprak.Tests/Simprak.Tests.csproj" />
+  </Folder>
+</Solution>
