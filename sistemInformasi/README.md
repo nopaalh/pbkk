@@ -50,7 +50,7 @@ Dokumen [PRD SIMPRAK](PRD.md) memuat ruang lingkup, peran dan hak akses, 41 kebu
 
 | Elemen | Tema Terang | Tema Gelap | Penggunaan |
 | :--- | :--- | :--- | :--- |
-| **Aksen (180DC Green)** | `#6D9E31` | `#8BC34A` | Tombol utama, menu aktif, tautan, grafik |
+| **Aksen** | `#6D9E31` | `#8BC34A` | Tombol utama, menu aktif, tautan, grafik |
 | **Sidebar** | `#111C14` | `#09100B` | Navigasi samping (*Deep Forest Charcoal*) |
 | **Latar** | `#F4F7F2` | `#0D1510` | Latar halaman utama |
 | **Permukaan** | `#FFFFFF` | `#152219` | Kartu statistik, tabel, dan dialog |
