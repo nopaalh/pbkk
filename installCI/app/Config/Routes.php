@@ -11,6 +11,8 @@ $routes->post('/login', 'Auth::attempt');
 
 $routes->group('', ['filter' => 'auth'], static function ($routes) {
     $routes->get('dashboard', 'Dashboard::index');
+    $routes->get('dashboard/profile', 'Dashboard::profile');
+    $routes->get('dashboard/about', 'Dashboard::about');
     $routes->post('logout', 'Auth::logout');
     $routes->get('mahasiswa', 'Mahasiswa::index');
     $routes->get('mahasiswa/create', 'Mahasiswa::create');
