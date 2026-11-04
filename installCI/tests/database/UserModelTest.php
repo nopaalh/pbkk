@@ -8,6 +8,10 @@ final class UserModelTest extends CIUnitTestCase
 {
     use DatabaseTestTrait;
 
+    protected $namespace = 'App';
+    protected $migrate = true;
+    protected $refresh = true;
+
     public function testStoresPasswordHash(): void
     {
         $users = new UserModel();

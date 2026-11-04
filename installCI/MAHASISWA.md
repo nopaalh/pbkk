@@ -1,7 +1,14 @@
-# Modul mahasiswa
+# Sistem akademik
 
-Konfigurasikan MySQL/MariaDB di `.env` dan jalankan `php spark migrate`. Login melalui `/login` menggunakan tombol akun demo, lalu buka `/mahasiswa` untuk menambah, melihat, mengubah, dan menghapus data. Login demo tidak membutuhkan database, tetapi CRUD mahasiswa membutuhkannya.
+Aplikasi menggunakan SQLite, sehingga tidak memerlukan server MySQL. Pastikan ekstensi SQLite3 tersedia untuk PHP yang digunakan (`php -m | grep -i sqlite`). Pada Ubuntu dengan PHP 8.5, pasang melalui `sudo apt install php8.5-sqlite3`, lalu jalankan:
 
-Foto JPG, PNG, atau WebP maksimal 2 MB bersifat opsional dan disimpan di `writable/uploads/mahasiswa`, bukan di `public/`. Foto disajikan melalui route yang memerlukan login. Pastikan direktori `writable` dapat ditulis dan tidak dapat diakses langsung dari web. Foto lama dihapus setelah pembaruan atau penghapusan data berhasil.
+```bash
+php spark migrate
+php spark serve
+```
 
-Jalankan tes dengan `vendor/bin/phpunit`. Tes database menggunakan konfigurasi `tests` pada `app/Config/Database.php` dan membutuhkan ekstensi PHP SQLite3.
+Buka `http://localhost:8080/login`, isi akun demo, lalu login. Dashboard ada di `http://localhost:8080/dashboard` dan daftar mahasiswa di `http://localhost:8080/mahasiswa`. Profil dan tentang dapat dibuka dari sidebar dashboard. File database dibuat di `writable/database/akademik.sqlite`; direktori `writable` harus dapat ditulis. File database tidak disertakan dalam Git.
+
+Foto JPG, PNG, atau WebP maksimal 2 MB bersifat opsional dan disimpan di `writable/uploads/mahasiswa`, bukan di `public/`. Foto disajikan melalui route yang memerlukan login. Foto lama dihapus setelah pembaruan atau penghapusan data berhasil.
+
+Jalankan tes dengan `vendor/bin/phpunit`. Tes database memakai SQLite di memori dan juga membutuhkan ekstensi PHP SQLite3.

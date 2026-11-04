@@ -124,3 +124,6 @@ _modules/*
 
 /results/
 /phpunit.xml
+
+# Local SQLite database and journal files
+/writable/database/*.sqlite*
