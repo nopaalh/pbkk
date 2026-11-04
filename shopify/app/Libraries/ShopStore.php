@@ -2,6 +2,7 @@
 namespace App\Libraries;
 
 use PDO;
+use Config\DemoCustomer;
 use RuntimeException;
 
 class ShopStore
@@ -19,6 +20,17 @@ class ShopStore
         if ((int) $this->db->query('SELECT COUNT(*) FROM products')->fetchColumn() === 0) {
             $stmt = $this->db->prepare('INSERT INTO products (name,description,category,price,stock,sprite,color) VALUES (?,?,?,?,?,?,?)');
             foreach ([['Raspberry ripple','Kesegaran raspberry dalam setiap gigitan.','Icepops',22000,30,0,'#ef7774'],['Coconut cloud','Gelato kelapa yang lembut dan creamy.','Gelato',25000,25,1,'#e6ded2'],['Passion fruit','Rasa markisa yang segar dan cerah.','Icepops',24000,25,2,'#e8a540'],['Golden mango','Manisnya mangga untuk hari yang cerah.','Icepops',23000,20,3,'#f2bb35'],['Brownie bliss','Cokelat dan brownie dalam satu sajian.','Gelato',28000,20,4,'#c49b89'],['Cookies & cream','Perpaduan klasik dengan potongan kukis.','Gelato',28000,20,5,'#c5b7a8']] as $row) $stmt->execute($row);
+        }
+        $demo = $this->db->prepare('SELECT id FROM customers WHERE email=?');
+        $demo->execute([DemoCustomer::EMAIL]);
+        if (!$demo->fetch()) {
+            try {
+                $demo = $this->db->prepare('INSERT INTO customers (name,email,password_hash) VALUES (?,?,?)');
+                $demo->execute([DemoCustomer::NAME, DemoCustomer::EMAIL, password_hash(DemoCustomer::PASSWORD, PASSWORD_DEFAULT)]);
+            } catch (\PDOException $error) {
+                // Another request may have created the account in the meantime.
+                if ($error->getCode() !== '23000') throw $error;
+            }
         }
     }
     public function product(int $id): ?array { $s=$this->db->prepare('SELECT * FROM products WHERE id=? AND active=1'); $s->execute([$id]); return $s->fetch() ?: null; }

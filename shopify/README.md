@@ -11,7 +11,7 @@ Buka http://localhost:8080. PHP memerlukan ekstensi PDO SQLite dan fileinfo. Apl
 
 Pembeli dapat mendaftar di menu Akun untuk melihat riwayat, atau checkout tanpa akun dan menyimpan tautan invoice. Stok berkurang ketika pesanan dibuat. Perubahan status oleh admin tidak mengembalikan stok otomatis. Omzet adalah total pesanan Completed.
 
-Admin dapat masuk melalui `/login`, lalu membuka `/admin/shop`. Akun demo dikonfigurasi pada `app/Config/DemoAdmin.php`; ganti sebelum aplikasi diakses publik.
+Akun demo pembeli: `pembeli@demo.local` / `demo12345` melalui menu Akun. Akun demo admin: `admin@demo.local` / `admin12345` melalui `/login`, lalu buka `/admin/shop`. Kredensial demo dikonfigurasi pada `app/Config/DemoCustomer.php` dan `app/Config/DemoAdmin.php`. Hapus atau ganti akun demo sebelum aplikasi diakses publik.
 
 ## MySQL opsional
 

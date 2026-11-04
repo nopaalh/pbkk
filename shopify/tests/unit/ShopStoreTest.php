@@ -7,6 +7,17 @@ use CodeIgniter\Test\CIUnitTestCase;
 
 final class ShopStoreTest extends CIUnitTestCase
 {
+    public function testDemoCustomerIsCreatedWithHashedPassword(): void
+    {
+        $store = new ShopStore(':memory:');
+        $query = $store->db->prepare('SELECT * FROM customers WHERE email = ?');
+        $query->execute([\Config\DemoCustomer::EMAIL]);
+        $customer = $query->fetch();
+        self::assertNotFalse($customer);
+        self::assertTrue(password_verify(\Config\DemoCustomer::PASSWORD, $customer['password_hash']));
+        self::assertNotSame(\Config\DemoCustomer::PASSWORD, $customer['password_hash']);
+    }
+
     public function testCheckoutUpdatesStockAndRecordsInvoice(): void
     {
         $store = new ShopStore(':memory:');
