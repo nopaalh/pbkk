@@ -25,7 +25,7 @@
     </aside>
     <div class="app-main">
         <header class="app-header"><div><span class="header-caption">Sistem informasi akademik</span><strong>Ruang administrasi</strong></div><div class="header-account"><span class="account-avatar">A</span><span><strong>Administrator</strong><small><?= esc(session()->get('user_email')) ?></small></span><form action="<?= site_url('logout') ?>" method="post"><?= csrf_field() ?><button class="logout-button" type="submit" title="Logout" aria-label="Logout"><i class="fas fa-sign-out-alt"></i></button></form></div></header>
-        <main class="app-content <?= $path === 'dashboard' ? 'dashboard-content' : '' ?>"><?= $this->renderSection('content') ?></main>
+        <main class="app-content"><?= $this->renderSection('content') ?></main>
         <footer class="app-footer">Sistem Akademik <span>© <?= date('Y') ?> PBKK</span></footer>
     </div>
 </div>
