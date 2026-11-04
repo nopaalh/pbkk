@@ -24,6 +24,9 @@
             <a class="nav-link" href="<?= base_url('dashboard') ?>"><i class="fas fa-fw fa-tachometer-alt"></i> <span>Dashboard</span></a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" href="<?= site_url('mahasiswa') ?>"><i class="fas fa-fw fa-users"></i> <span>Mahasiswa</span></a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" href="<?= base_url('profile') ?>"><i class="fas fa-fw fa-user"></i> <span>Profile</span></a>
         </li>
         <li class="nav-item">
