@@ -28,6 +28,14 @@ to your `app` folder. The affected files can be copied or merged from
 Copy `env` to `.env` and tailor for your app, specifically the baseURL
 and any database settings.
 
+## Autentikasi admin
+
+Login adalah simulasi tanpa database. Pada `/login`, klik **Isi akun demo**, lalu tekan Login. Kredensial ditentukan di `app/Config/DemoAdmin.php`: email `admin@demo.local` dan password `admin12345`. Tombol tersedia di semua environment, termasuk production.
+
+**Peringatan:** kredensial ini publik dan siapa pun dapat mengakses halaman admin. Gunakan hanya untuk simulasi tanpa data sensitif. Login tidak menggunakan tabel `users`, command `admin:create`, atau seeder. Modul CRUD mahasiswa tetap memerlukan database MySQL/MariaDB yang dikonfigurasi di `.env` dan migration melalui `php spark migrate`.
+
+Buka `/login` untuk masuk. Route dashboard, mahasiswa, foto, dan logout dilindungi filter `auth`; filter CSRF diaktifkan secara global untuk request yang mengubah data. Logout dilakukan dengan POST. Setelah login, session menyimpan identitas user dan role `admin`; logout menghancurkan session. Aplikasi ini belum memiliki manajemen role atau pembatasan percobaan login, sehingga belum siap digunakan sebagai sistem autentikasi produksi.
+
 ## Important Change with index.php
 
 `index.php` is no longer in the root of the project! It has been moved inside the *public* folder,

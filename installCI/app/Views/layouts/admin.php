@@ -12,7 +12,11 @@
 <nav class="admin-topbar navbar navbar-dark bg-dark">
     <a class="navbar-brand" href="<?= base_url('dashboard') ?>">Admin PBKK</a>
     <button class="btn text-white-50" id="sidebarToggleTop" type="button" aria-label="Ubah tampilan sidebar" aria-controls="accordionSidebar"><i class="fas fa-bars"></i></button>
-    <span class="ml-auto text-white-50 small">Dashboard Admin</span>
+    <span class="ml-auto text-white-50 small mr-3"><?= esc(session()->get('user_email')) ?></span>
+    <form action="<?= site_url('logout') ?>" method="post">
+        <?= csrf_field() ?>
+        <button type="submit" class="btn btn-sm btn-outline-light">Logout</button>
+    </form>
 </nav>
 <div id="wrapper">
     <ul class="navbar-nav sidebar sidebar-dark" id="accordionSidebar">
