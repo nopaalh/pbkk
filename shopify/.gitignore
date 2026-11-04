@@ -1,0 +1,9 @@
+/vendor/
+/writable/**/*
+!/writable/**/
+!/writable/**/.gitkeep
+/writable/*.db*
+.env
+/public/uploads/products/*
+!/public/uploads/products/.gitkeep
+.phpunit.result.cache
