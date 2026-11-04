@@ -2,3 +2,16 @@
 
 /* Separate dashboard sections from the surrounding workspace. */
 .dashboard-content{background:#f4f6fb}.dashboard-content .metric,.dashboard-content .panel{background:#fff;border-color:#e8edf5;box-shadow:0 4px 16px rgba(47,65,105,.04)}.dashboard-content .metric{padding:22px 18px}.dashboard-content .panel{border-radius:12px}
+
+/* Desktop layout: 264px sidebar, 28px content inset, 12 columns and 20px gutters. */
+@media (min-width: 701px) {
+    .app-sidebar { width: 264px; }
+    .app-header { padding-left: 28px; padding-right: 28px; }
+    .app-content { padding-left: 28px; padding-right: 28px; }
+    .app-footer { padding-left: 28px; padding-right: 28px; }
+    .dashboard-content .metrics { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 20px; }
+    .dashboard-content .metric { grid-column: span 3; }
+}
+@media (min-width: 701px) and (max-width: 1000px) {
+    .dashboard-content .metric { grid-column: span 6; }
+}
