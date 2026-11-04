@@ -3,3 +3,7 @@
 .demo-account{background:#f8f5ef;padding:16px 20px;font-size:13px;line-height:1.7;max-width:550px}
 
 .demo-fill{justify-self:start;border:1px solid #171717;background:transparent;padding:12px 20px;font:700 13px 'DM Sans',sans-serif;cursor:pointer}.demo-fill:hover{background:#f8f5ef}.demo-fill:focus-visible{outline:2px solid #b77d20;outline-offset:3px}
+
+.shop-header .nav-icon{display:inline-flex;align-items:center;justify-content:center;min-width:32px;min-height:40px}.nav-icon svg{width:23px;height:23px}.shop-header .nav-icon:focus-visible{outline:2px solid #b77d20;outline-offset:4px}.cart-link span{margin-left:2px}
+
+.account-menu{position:relative}.account-menu summary{list-style:none;cursor:pointer}.account-menu summary::-webkit-details-marker{display:none}.account-menu summary:focus-visible{outline:2px solid #b77d20;outline-offset:4px}.account-dropdown{position:absolute;right:0;top:100%;z-index:20;min-width:175px;padding:8px;background:#fff;box-shadow:0 8px 30px #0002}.account-dropdown a,.shop-header .account-dropdown button{display:block;width:100%;padding:11px 12px;text-align:left;text-decoration:none;font-size:13px}.account-dropdown a:hover,.shop-header .account-dropdown button:hover{background:#f8f5ef}.account-dropdown form{display:block}

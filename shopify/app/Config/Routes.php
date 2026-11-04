@@ -19,6 +19,7 @@ $routes->get('account', 'Shop::account');
 $routes->post('account/register', 'Shop::register');
 $routes->post('account/login', 'Shop::login');
 $routes->post('account/logout', 'Shop::logout');
+$routes->get('profile', 'Shop::profile');
 $routes->get('orders', 'Shop::orders');
 $routes->get('admin/shop', 'Shop::adminDashboard');
 $routes->get('admin/shop/products/new', 'Shop::productForm');
