@@ -1,0 +1,16 @@
+body { font-family: Arial, sans-serif; color: #343a40; background: #fff; }
+.admin-topbar { min-height: 56px; justify-content: flex-start; }
+.admin-topbar .navbar-brand { font-size: 1.1rem; margin-right: .75rem; }
+#wrapper { min-height: calc(100vh - 56px); }
+#wrapper .sidebar { background: #212529; flex-shrink: 0; }
+#wrapper .sidebar .nav-item .nav-link { color: rgba(255,255,255,.65); }
+#wrapper .sidebar .nav-item.active .nav-link, #wrapper .sidebar .nav-item .nav-link:hover { color: #fff; }
+#wrapper #content-wrapper { background: #fff; min-width: 0; }
+.breadcrumb { background: #e9ecef; }
+.stat-card { position: relative; overflow: hidden; color: #fff; border: 0; }
+.stat-card .card-body { min-height: 86px; z-index: 1; }
+.stat-card .stat-icon { position: absolute; right: -8px; top: 4px; font-size: 4rem; opacity: .3; transform: rotate(15deg); }
+.stat-card .card-footer { position: relative; z-index: 1; background: rgba(0,0,0,.1); border: 0; font-size: .8rem; }
+.dashboard-chart { position: relative; height: 300px; }
+.admin-footer { background: #e9ecef; }
+@media (max-width: 767px) { .dashboard-chart { height: 240px; } }
