@@ -57,7 +57,27 @@ $total=static fn($items)=>array_sum(array_map(static fn($i)=>(int)$i['price']*(i
 <div class="invoice-head"><div><span class="eyebrow">Invoice</span><h1><?= $e($order['invoice']) ?></h1></div><button class="button print-button" onclick="window.print()">Cetak invoice</button></div><p><?= $e($order['created_at']) ?> · <?= $e($order['status']) ?></p><h3>Penerima</h3><p><?= $e($order['recipient']) ?><br><?= $e($order['whatsapp']) ?><br><?= nl2br($e($order['address'])) ?></p><div class="list"><?php foreach($order['items'] as $item): ?><div class="cart-row"><span><?= $e($item['product_name']) ?> × <?= (int)$item['quantity'] ?></span><span><?= $rp($item['price']*$item['quantity']) ?></span></div><?php endforeach ?></div><div class="cart-total"><b>Total</b><b><?= $rp($order['total']) ?></b></div><p>Simpan tautan halaman ini untuk melihat invoice kembali.</p></main>
 <?php elseif($page==='account'): ?><main class="content"><?= view('components/back_link', ['path' => '/', 'label' => 'Kembali ke katalog']) ?><h1>Akun pembeli</h1><div class="columns"><form class="stack-form" method="post" action="<?= $url('account/login') ?>"><?= csrf_field() ?><h2>Masuk</h2><p class="demo-account">Akun demo pembeli<br><strong><?= $e(\Config\DemoCustomer::EMAIL) ?></strong><br>Kata sandi: <strong><?= $e(\Config\DemoCustomer::PASSWORD) ?></strong></p><label>Email<input type="email" name="email" required></label><label>Kata sandi<input type="password" name="password" required></label><button class="button">Masuk</button><button type="button" class="demo-fill" data-demo-email="<?= $e(\Config\DemoCustomer::EMAIL) ?>" data-demo-password="<?= $e(\Config\DemoCustomer::PASSWORD) ?>">Isi akun demo</button></form><form class="stack-form" method="post" action="<?= $url('account/register') ?>"><?= csrf_field() ?><h2>Buat akun</h2><label>Nama<input name="name" required maxlength="100"></label><label>Email<input type="email" name="email" required></label><label>Kata sandi<input type="password" name="password" minlength="8" required></label><button class="button">Daftar</button></form></div></main>
 <?php elseif($page==='profile'): ?><main class="content narrow"><?= view('components/back_link', ['path' => '/', 'label' => 'Kembali ke katalog']) ?><h1>Profil saya</h1><p><strong>Nama</strong><br><?= $e($customer['name']) ?></p><p><strong>Email</strong><br><?= $e($customer['email']) ?></p><a href="<?= $url('orders') ?>">Lihat pesanan saya</a></main>
-<?php elseif($page==='orders'): ?><main class="content narrow"><?= view('components/back_link', ['path' => '/', 'label' => 'Kembali ke katalog']) ?><h1>Pesanan saya</h1><?php if(!$orders): ?><p>Belum ada pesanan.</p><?php endif ?><div class="list"><?php foreach($orders as $o): ?><a class="cart-row" href="<?= $url('invoice/'.$o['invoice']) ?>"><b><?= $e($o['invoice']) ?></b><span><?= $e($o['status']) ?></span><span><?= $rp($o['total']) ?></span></a><?php endforeach ?></div></main>
+<?php elseif ($page === 'orders'): ?>
+<main class="content narrow">
+    <?= view('components/back_link', ['path' => '/', 'label' => 'Kembali ke katalog']) ?>
+    <h1>Pesanan saya</h1>
+    <?php if (!$orders): ?>
+        <p>Belum ada pesanan.</p>
+    <?php else: ?>
+        <div class="list">
+            <?php foreach ($orders as $order): ?>
+                <a class="cart-row order-row" href="<?= esc($url('invoice/'.$order['invoice']), 'attr') ?>">
+                    <b><?= $e($order['invoice']) ?></b>
+                    <span class="order-status"><?= $e($order['status']) ?></span>
+                    <span><?= $rp($order['total']) ?></span>
+                    <span class="order-detail">
+                        <span class="order-detail-icon" role="img" aria-label="Lihat detail"></span>
+                    </span>
+                </a>
+            <?php endforeach ?>
+        </div>
+    <?php endif ?>
+</main>
 <?php elseif($page==='admin'): ?><main class="content"><?= view('components/back_link', ['path' => '/', 'label' => 'Kembali ke katalog']) ?><div class="heading-row"><div><span class="eyebrow">Panel toko</span><h1>Dashboard</h1></div><div class="actions">
         <a href="<?= $url('admin/shop/invoices') ?>">Kelola invoice</a>
         <a class="button inline" href="<?= $url('admin/shop/products/new') ?>">Tambah produk</a>

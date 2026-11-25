@@ -115,6 +115,51 @@ button,
     outline-offset: 3px;
 }
 
+.order-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, .65fr) auto auto;
+}
+
+.order-detail {
+    display: grid;
+    justify-self: end;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    background: #171717;
+    color: #fff;
+}
+
+.order-detail-icon {
+    width: 20px;
+    height: 20px;
+    background: currentColor;
+    mask: url('order-detail.svg') center / contain no-repeat;
+}
+
+.order-row:hover .order-detail,
+.order-row:focus-visible .order-detail {
+    background: #f4be5e;
+    color: #171717;
+}
+
+.order-row:focus-visible {
+    outline: 2px solid #171717;
+    outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+    .order-row {
+        grid-template-columns: minmax(0, 1fr) auto;
+        row-gap: 10px;
+    }
+
+    .order-status {
+        justify-self: end;
+    }
+}
+
 @media screen {
     .back-link {
         display: flex;
