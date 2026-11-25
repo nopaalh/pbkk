@@ -7,6 +7,8 @@ use RuntimeException;
 
 class ShopStore
 {
+    public const ORDER_STATUSES = ['Pending', 'Processing', 'Completed', 'Cancelled'];
+
     public PDO $db;
     public function __construct(?string $path = null)
     {

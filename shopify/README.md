@@ -1,5 +1,7 @@
 # Shopify — katalog dan belanja
 
+[Laporan praktikum PBKK](docs/LAPORAN.md) berisi alur aplikasi, hasil pengujian, dan tangkapan layar.
+
 Aplikasi toko CodeIgniter 4. Dari folder `shopify`, jalankan:
 
 ```bash

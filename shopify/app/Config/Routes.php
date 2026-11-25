@@ -22,6 +22,7 @@ $routes->post('account/logout', 'Shop::logout');
 $routes->get('profile', 'Shop::profile');
 $routes->get('orders', 'Shop::orders');
 $routes->get('admin/shop', 'Shop::adminDashboard');
+$routes->get('admin/shop/invoices', 'Shop::adminInvoices');
 $routes->get('admin/shop/products/new', 'Shop::productForm');
 $routes->get('admin/shop/products/(:num)/edit', 'Shop::productForm/$1');
 $routes->post('admin/shop/products', 'Shop::saveProduct');

@@ -43,7 +43,12 @@ abstract class BaseController extends Controller
         // Caution: Do not edit this line.
         parent::initController($request, $response, $logger);
 
-        // Preload any models, libraries, etc, here.
-        // $this->session = service('session');
+        if ($request instanceof IncomingRequest) {
+            $session = session();
+            // Older sessions may have both accounts active. Keep admin access.
+            if ($session->get('role') === 'admin' && $session->has('shop_customer_id')) {
+                $session->remove(['shop_customer_id', 'shop_customer_name']);
+            }
+        }
     }
 }

@@ -10,8 +10,10 @@ class ShopAdminAuth extends BaseController
         $email = strtolower(trim((string) $this->request->getPost('email')));
         $password = (string) $this->request->getPost('password');
         if (!hash_equals(DemoAdmin::EMAIL, $email) || !hash_equals(DemoAdmin::PASSWORD, $password)) return redirect()->to(site_url('login'))->with('error', 'Email atau kata sandi salah.');
-        session()->regenerate(true);
-        session()->set(['role' => 'admin']);
+        $session = session();
+        $session->remove(['shop_customer_id', 'shop_customer_name']);
+        $session->regenerate(true);
+        $session->set('role', 'admin');
         return redirect()->to(site_url('admin/shop'));
     }
     public function logout() { session()->remove('role'); session()->regenerate(true); return redirect()->to(site_url('/')); }
