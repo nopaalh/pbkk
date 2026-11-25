@@ -23,6 +23,8 @@ $total=static fn($items)=>array_sum(array_map(static fn($i)=>(int)$i['price']*(i
                     <a href="<?= $url('admin/shop') ?>">Admin toko</a>
                     <a href="<?= $url('admin/shop/invoices') ?>">Invoice toko</a>
                     <form action="<?= $url('admin/logout') ?>" method="post"><?= csrf_field() ?><button>Keluar admin</button></form>
+                <?php else: ?>
+                    <a href="<?= $url('login') ?>">Masuk admin</a>
                 <?php endif ?>
             </div>
         </details>
