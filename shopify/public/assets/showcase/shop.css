@@ -50,6 +50,18 @@
     }
 }
 
+button,
+.button,
+.demo-fill,
+.account-dropdown a,
+.shop-header .account-dropdown button {
+    border-radius: 8px;
+}
+
+.button-compact {
+    padding: 6px 14px;
+}
+
 @media screen {
     .back-link {
         display: flex;

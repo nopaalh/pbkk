@@ -76,7 +76,7 @@ $total=static fn($items)=>array_sum(array_map(static fn($i)=>(int)$i['price']*(i
                                         <option <?= $order['status'] === $status ? 'selected' : '' ?>><?= $e($status) ?></option>
                                     <?php endforeach ?>
                                 </select>
-                                <button>Simpan</button>
+                                <button class="button button-compact">Simpan</button>
                             </form>
                         </td>
                     </tr>
