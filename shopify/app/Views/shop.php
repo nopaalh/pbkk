@@ -21,6 +21,7 @@ $total=static fn($items)=>array_sum(array_map(static fn($i)=>(int)$i['price']*(i
                 <?php endif ?>
                 <?php if(session()->get('role')==='admin'): ?>
                     <a href="<?= $url('admin/shop') ?>">Admin toko</a>
+                    <a href="<?= $url('admin/shop/invoices') ?>">Invoice toko</a>
                     <form action="<?= $url('admin/logout') ?>" method="post"><?= csrf_field() ?><button>Keluar admin</button></form>
                 <?php endif ?>
             </div>
@@ -37,6 +38,42 @@ $total=static fn($items)=>array_sum(array_map(static fn($i)=>(int)$i['price']*(i
 <?php elseif($page==='account'): ?><main class="content"><h1>Akun pembeli</h1><div class="columns"><form class="stack-form" method="post" action="<?= $url('account/login') ?>"><?= csrf_field() ?><h2>Masuk</h2><p class="demo-account">Akun demo pembeli<br><strong><?= $e(\Config\DemoCustomer::EMAIL) ?></strong><br>Kata sandi: <strong><?= $e(\Config\DemoCustomer::PASSWORD) ?></strong></p><label>Email<input type="email" name="email" required></label><label>Kata sandi<input type="password" name="password" required></label><button class="button">Masuk</button><button type="button" class="demo-fill" data-demo-email="<?= $e(\Config\DemoCustomer::EMAIL) ?>" data-demo-password="<?= $e(\Config\DemoCustomer::PASSWORD) ?>">Isi akun demo</button></form><form class="stack-form" method="post" action="<?= $url('account/register') ?>"><?= csrf_field() ?><h2>Buat akun</h2><label>Nama<input name="name" required maxlength="100"></label><label>Email<input type="email" name="email" required></label><label>Kata sandi<input type="password" name="password" minlength="8" required></label><button class="button">Daftar</button></form></div></main>
 <?php elseif($page==='profile'): ?><main class="content narrow"><h1>Profil saya</h1><p><strong>Nama</strong><br><?= $e($customer['name']) ?></p><p><strong>Email</strong><br><?= $e($customer['email']) ?></p><a href="<?= $url('orders') ?>">Lihat pesanan saya</a></main>
 <?php elseif($page==='orders'): ?><main class="content narrow"><h1>Pesanan saya</h1><?php if(!$orders): ?><p>Belum ada pesanan.</p><?php endif ?><div class="list"><?php foreach($orders as $o): ?><a class="cart-row" href="<?= $url('invoice/'.$o['invoice']) ?>"><b><?= $e($o['invoice']) ?></b><span><?= $e($o['status']) ?></span><span><?= $rp($o['total']) ?></span></a><?php endforeach ?></div></main>
-<?php elseif($page==='admin'): ?><main class="content"><div class="heading-row"><div><span class="eyebrow">Panel toko</span><h1>Dashboard</h1></div><a class="button inline" href="<?= $url('admin/shop/products/new') ?>">Tambah produk</a></div><div class="metrics"><div><span>Omzet pesanan selesai</span><b><?= $rp($revenue) ?></b></div><div><span>Pesanan masuk</span><b><?= count($orders) ?></b></div><div><span>Produk aktif</span><b><?= count($products) ?></b></div></div><h2>Produk</h2><div class="table-scroll"><table><tr><th>Produk</th><th>Kategori</th><th>Harga</th><th>Stok</th><th>Aksi</th></tr><?php foreach($products as $p): ?><tr><td><?= $e($p['name']) ?></td><td><?= $e($p['category']) ?></td><td><?= $rp($p['price']) ?></td><td><?= (int)$p['stock'] ?></td><td><a href="<?= $url('admin/shop/products/'.$p['id'].'/edit') ?>">Edit</a> <form class="inline-form" method="post" action="<?= $url('admin/shop/products/'.$p['id'].'/delete') ?>" onsubmit="return confirm('Hapus produk dari katalog?')"><?= csrf_field() ?><button class="text-button">Hapus</button></form></td></tr><?php endforeach ?></table></div><h2>Pesanan</h2><div class="table-scroll"><table><tr><th>Invoice</th><th>Penerima</th><th>Total</th><th>Status</th></tr><?php foreach($orders as $o): ?><tr><td><a href="<?= $url('invoice/'.$o['invoice']) ?>"><?= $e($o['invoice']) ?></a></td><td><?= $e($o['recipient']) ?></td><td><?= $rp($o['total']) ?></td><td><form method="post" action="<?= $url('admin/shop/orders/'.$o['id'].'/status') ?>"><?= csrf_field() ?><select name="status"><?php foreach(['Pending','Processing','Completed','Cancelled'] as $status): ?><option <?= $o['status']===$status?'selected':'' ?>><?= $status ?></option><?php endforeach ?></select> <button>Simpan</button></form></td></tr><?php endforeach ?></table></div></main>
+<?php elseif($page==='admin'): ?><main class="content"><div class="heading-row"><div><span class="eyebrow">Panel toko</span><h1>Dashboard</h1></div><div class="actions">
+        <a href="<?= $url('admin/shop/invoices') ?>">Kelola invoice</a>
+        <a class="button inline" href="<?= $url('admin/shop/products/new') ?>">Tambah produk</a>
+    </div></div><div class="metrics"><div><span>Omzet pesanan selesai</span><b><?= $rp($revenue) ?></b></div><div><span>Pesanan masuk</span><b><?= $orderCount ?></b></div><div><span>Produk aktif</span><b><?= count($products) ?></b></div></div><h2>Produk</h2><div class="table-scroll"><table><tr><th>Produk</th><th>Kategori</th><th>Harga</th><th>Stok</th><th>Aksi</th></tr><?php foreach($products as $p): ?><tr><td><?= $e($p['name']) ?></td><td><?= $e($p['category']) ?></td><td><?= $rp($p['price']) ?></td><td><?= (int)$p['stock'] ?></td><td><a href="<?= $url('admin/shop/products/'.$p['id'].'/edit') ?>">Edit</a> <form class="inline-form" method="post" action="<?= $url('admin/shop/products/'.$p['id'].'/delete') ?>" onsubmit="return confirm('Hapus produk dari katalog?')"><?= csrf_field() ?><button class="text-button">Hapus</button></form></td></tr><?php endforeach ?></table></div></main>
+<?php elseif ($page === 'admin_invoices'): ?>
+<main class="content">
+    <h1>Invoice toko</h1>
+    <?php if (!$orders): ?>
+        <p>Belum ada pesanan masuk.</p>
+    <?php else: ?>
+        <div class="table-scroll">
+            <table>
+                <thead><tr><th scope="col">Invoice</th><th scope="col">Penerima</th><th scope="col">Total</th><th scope="col">Status</th></tr></thead>
+                <tbody>
+                <?php foreach ($orders as $order): ?>
+                    <tr>
+                        <td><a href="<?= $url('invoice/'.$order['invoice']) ?>"><?= $e($order['invoice']) ?></a></td>
+                        <td><?= $e($order['recipient']) ?></td>
+                        <td><?= $rp($order['total']) ?></td>
+                        <td>
+                            <form method="post" action="<?= $url('admin/shop/orders/'.$order['id'].'/status') ?>">
+                                <?= csrf_field() ?>
+                                <select name="status" aria-label="Status <?= $e($order['invoice']) ?>">
+                                    <?php foreach (\App\Libraries\ShopStore::ORDER_STATUSES as $status): ?>
+                                        <option <?= $order['status'] === $status ? 'selected' : '' ?>><?= $e($status) ?></option>
+                                    <?php endforeach ?>
+                                </select>
+                                <button>Simpan</button>
+                            </form>
+                        </td>
+                    </tr>
+                <?php endforeach ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif ?>
+</main>
 <?php elseif($page==='product_form'): ?><main class="content narrow"><a class="back" href="<?= $url('admin/shop') ?>">← Dashboard toko</a><h1><?= $product?'Edit':'Tambah' ?> produk</h1><form class="stack-form" method="post" enctype="multipart/form-data" action="<?= $url('admin/shop/products'.($product?'/'.$product['id']:'')) ?>"><?= csrf_field() ?><label>Nama<input name="name" value="<?= $e(old('name',$product['name']??'')) ?>" maxlength="100" required></label><label>Deskripsi<textarea name="description" maxlength="1000" required><?= $e(old('description',$product['description']??'')) ?></textarea></label><label>Kategori<select name="category"><?php foreach(['Icepops','Gelato'] as $c): ?><option <?= old('category',$product['category']??'')===$c?'selected':'' ?>><?= $c ?></option><?php endforeach ?></select></label><label>Harga (Rupiah)<input type="number" name="price" min="0" value="<?= $e(old('price',$product['price']??0)) ?>" required></label><label>Stok<input type="number" name="stock" min="0" value="<?= $e(old('stock',$product['stock']??0)) ?>" required></label><label>Foto produk (JPEG, PNG, WebP; maksimal 3 MB)<input type="file" name="image" accept="image/jpeg,image/png,image/webp"></label><button class="button">Simpan produk</button></form></main><?php endif ?>
 <footer class="shop-footer"><a class="logo" href="<?= $url('/') ?>">shopify<span>.</span></a><span>Good days taste better together.</span></footer><script src="<?= base_url('assets/showcase/demo-fill.js') ?>" defer></script></body></html>

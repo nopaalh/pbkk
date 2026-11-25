@@ -22,9 +22,50 @@ class Shop extends BaseController
     public function logout() { session()->remove(['shop_customer_id','shop_customer_name']); session()->regenerate(true); return redirect()->to(site_url('/')); }
     public function profile() { if(!session()->get('shop_customer_id')) return redirect()->to(site_url('account')); $s=$this->store()->db->prepare('SELECT name,email FROM customers WHERE id=?'); $s->execute([session()->get('shop_customer_id')]); $customer=$s->fetch(); if(!$customer) return redirect()->to(site_url('account')); return $this->render('profile',['customer'=>$customer]); }
     public function orders() { if(!session()->get('shop_customer_id')) return redirect()->to(site_url('account')); $s=$this->store()->db->prepare('SELECT * FROM orders WHERE customer_id=? ORDER BY id DESC'); $s->execute([session()->get('shop_customer_id')]); return $this->render('orders',['orders'=>$s->fetchAll()]); }
-    public function adminDashboard() { $this->admin(); $db=$this->store()->db; return $this->render('admin',['products'=>$db->query('SELECT * FROM products WHERE active=1 ORDER BY id DESC')->fetchAll(),'orders'=>$db->query('SELECT * FROM orders ORDER BY id DESC')->fetchAll(),'revenue'=>$db->query("SELECT COALESCE(SUM(total),0) FROM orders WHERE status='Completed'")->fetchColumn()]); }
+    public function adminDashboard()
+    {
+        $this->admin();
+        $db = $this->store()->db;
+
+        return $this->render('admin', [
+            'products' => $db->query('SELECT * FROM products WHERE active=1 ORDER BY id DESC')->fetchAll(),
+            'orderCount' => (int) $db->query('SELECT COUNT(*) FROM orders')->fetchColumn(),
+            'revenue' => $db->query("SELECT COALESCE(SUM(total),0) FROM orders WHERE status='Completed'")->fetchColumn(),
+        ]);
+    }
+
+    public function adminInvoices()
+    {
+        $this->admin();
+        $orders = $this->store()->db
+            ->query('SELECT id, invoice, recipient, total, status FROM orders ORDER BY id DESC')
+            ->fetchAll();
+
+        return $this->render('admin_invoices', ['orders' => $orders]);
+    }
+
     public function productForm($id=null) { $this->admin(); $p=$id ? $this->store()->product((int)$id) : null; if($id && !$p)throw PageNotFoundException::forPageNotFound(); return $this->render('product_form',['product'=>$p]); }
     public function saveProduct($id=null) { $this->admin(); $store=$this->store(); $p=$id?$store->product((int)$id):null; if($id && !$p)throw PageNotFoundException::forPageNotFound(); $name=trim((string)$this->request->getPost('name')); $desc=trim((string)$this->request->getPost('description')); $cat=(string)$this->request->getPost('category'); $price=filter_var($this->request->getPost('price'),FILTER_VALIDATE_INT); $stock=filter_var($this->request->getPost('stock'),FILTER_VALIDATE_INT); if($name==='' || mb_strlen($name)>100 || $desc==='' || mb_strlen($desc)>1000 || !in_array($cat,['Icepops','Gelato'],true) || $price===false || $price<0 || $stock===false || $stock<0) return redirect()->back()->withInput()->with('error','Periksa kembali data produk.'); $image=$p['image']??null; $file=$this->request->getFile('image'); if($file && $file->getError()!==UPLOAD_ERR_NO_FILE) { if(!$file->isValid() || $file->getSize()>3*1024*1024 || !in_array($file->getMimeType(),['image/jpeg','image/png','image/webp'],true)) return redirect()->back()->withInput()->with('error','Foto harus JPEG, PNG, atau WebP dan maksimal 3 MB.'); $extension=['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp'][$file->getMimeType()]; $image=bin2hex(random_bytes(16)).'.'.$extension; $file->move(FCPATH.'uploads/products',$image); } if($id){$s=$store->db->prepare('UPDATE products SET name=?,description=?,category=?,price=?,stock=?,image=? WHERE id=?');$s->execute([$name,$desc,$cat,$price,$stock,$image,$id]);}else{$s=$store->db->prepare('INSERT INTO products (name,description,category,price,stock,image) VALUES (?,?,?,?,?,?)');$s->execute([$name,$desc,$cat,$price,$stock,$image]);} return redirect()->to(site_url('admin/shop'))->with('success','Produk disimpan.'); }
     public function deleteProduct($id) { $this->admin(); $s=$this->store()->db->prepare('UPDATE products SET active=0 WHERE id=?'); $s->execute([(int)$id]); return redirect()->to(site_url('admin/shop')); }
-    public function status($id) { $this->admin(); $status=(string)$this->request->getPost('status'); if(in_array($status,['Pending','Processing','Completed','Cancelled'],true)){ $s=$this->store()->db->prepare('UPDATE orders SET status=? WHERE id=?'); $s->execute([$status,(int)$id]); } return redirect()->to(site_url('admin/shop')); }
+    public function status($id)
+    {
+        $this->admin();
+        $status = (string) $this->request->getPost('status');
+        if (!in_array($status, ShopStore::ORDER_STATUSES, true)) {
+            return redirect()->to(site_url('admin/shop/invoices'))->with('error', 'Status invoice tidak valid.');
+        }
+
+        $db = $this->store()->db;
+        $statement = $db->prepare('UPDATE orders SET status=? WHERE id=?');
+        $statement->execute([$status, (int) $id]);
+        if ($statement->rowCount() === 0) {
+            $lookup = $db->prepare('SELECT id FROM orders WHERE id=?');
+            $lookup->execute([(int) $id]);
+            if ($lookup->fetchColumn() === false) {
+                throw PageNotFoundException::forPageNotFound();
+            }
+        }
+
+        return redirect()->to(site_url('admin/shop/invoices'))->with('success', 'Status invoice disimpan.');
+    }
 }
